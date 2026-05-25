@@ -6,4 +6,5 @@ export { default as TugasAkhir } from './TugasAkhir';
 export { default as Persetujuan } from './Persetujuan';
 export { default as ManajemenUser } from './ManajemenUser';
 export { default as NotFound } from './NotFound';
-export { default as Landing } from './Landing';
+export { default as Pengajuan } from './Pengajuan';
+export { default as Riwayat } from './Riwayat';

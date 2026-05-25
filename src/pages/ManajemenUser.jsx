@@ -370,7 +370,7 @@ export default function ManajemenUser() {
 
               <form onSubmit={handleCreate} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1.5">
+                  <label className="flex text-sm font-semibold text-gray-700 mb-1 items-center gap-1.5">
                     <User size={16} className="text-gray-400" /> Nama Lengkap
                   </label>
                   <input
@@ -384,7 +384,7 @@ export default function ManajemenUser() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1.5">
+                  <label className="flex text-sm font-semibold text-gray-700 mb-1 items-center gap-1.5">
                     <Mail size={16} className="text-gray-400" /> Email Kampus
                   </label>
                   <input
@@ -398,7 +398,7 @@ export default function ManajemenUser() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1.5">
+                  <label className="flex text-sm font-semibold text-gray-700 mb-1 items-center gap-1.5">
                     <Key size={16} className="text-gray-400" /> Password
                   </label>
                   <input
@@ -412,7 +412,7 @@ export default function ManajemenUser() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1.5">
+                  <label className="flex text-sm font-semibold text-gray-700 mb-1 items-center gap-1.5">
                     <Shield size={16} className="text-gray-400" /> Hak Akses / Role
                   </label>
                   <select
@@ -469,7 +469,7 @@ export default function ManajemenUser() {
 
               <form onSubmit={handleEditSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1.5">
+                  <label className="flex text-sm font-semibold text-gray-700 mb-1 items-center gap-1.5">
                     <User size={16} className="text-gray-400" /> Nama Lengkap
                   </label>
                   <input
@@ -482,7 +482,7 @@ export default function ManajemenUser() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1.5">
+                  <label className="flex text-sm font-semibold text-gray-700 mb-1 items-center gap-1.5">
                     <Mail size={16} className="text-gray-400" /> Email Kampus
                   </label>
                   <input
@@ -495,7 +495,7 @@ export default function ManajemenUser() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1.5">
+                  <label className="flex text-sm font-semibold text-gray-700 mb-1 items-center gap-1.5">
                     <Shield size={16} className="text-gray-400" /> Hak Akses / Role
                   </label>
                   <select

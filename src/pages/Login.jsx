@@ -123,7 +123,7 @@ export default function Login() {
             </div>
             <div className="text-left">
               <h2 className="font-bold text-sm tracking-wide text-[#1E293B] uppercase">SISTEM AKADEMIK</h2>
-              <p className="text-xs text-[#1D63DC] font-semibold">Universitas Nusantara</p>
+              <p className="text-xs text-[#1D63DC] font-semibold">Universitas UIN SUSKA RIAU</p>
             </div>
           </div>
 
@@ -148,7 +148,7 @@ export default function Login() {
 
           {/* Footer branding of portal */}
           <div className="z-10 text-xs text-[#94A3B8] font-semibold">
-            © 2026 Universitas Nusantara. Semua Hak Dilindungi.
+            © 2026 Universitas UIN SUSKA RIAU. Semua Hak Dilindungi.
           </div>
 
           {/* Soft background glow circles */}

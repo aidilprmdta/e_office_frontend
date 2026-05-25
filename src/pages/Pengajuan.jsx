@@ -3,15 +3,17 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '../layouts';
 import { Button } from '../components';
-import { uploadService, pengajuanService } from '../services';
-import { CloudUpload, Send } from 'lucide-react';
-import { suratService } from '/src/services/index.js';
+import { pengajuanService } from '../services';
+import { Send, FileText } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 export default function Pengajuan() {
   const navigate = useNavigate();
+  
+  // 1. SESUAIKAN STATE DENGAN SKEMA FASTAPI
   const [formData, setFormData] = useState({
-    judulTA: '',
-    perihal: '',
+    judul_perihal: '',
+    jenis_pengajuan: 'Surat', // Default dropdown
     kategori: 'Surat Aktif Kuliah',
     deskripsi: '',
     file: null,
@@ -28,23 +30,43 @@ export default function Pengajuan() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validasi file wajib ada
+    if (!formData.file) {
+      Swal.fire('File Kosong', 'Harap unggah dokumen lampiran (PDF).', 'warning');
+      return;
+    }
+
     setSubmitting(true);
     try {
-      let fileUrl = null;
-      if (formData.file) {
-        // Assume uploadService returns the uploaded file URL
-        const uploadRes = await uploadService.upload(formData.file);
-        fileUrl = uploadRes.url;
-      }
-      await pengajuanService.create({
-        ...formData,
-        fileUrl,
+      // 2. WAJIB MENGGUNAKAN FORMDATA KARENA ADA FILE FISIK
+      const submitData = new FormData();
+      submitData.append('judul_perihal', formData.judul_perihal);
+      submitData.append('jenis_pengajuan', formData.jenis_pengajuan);
+      submitData.append('kategori', formData.kategori);
+      submitData.append('deskripsi', formData.deskripsi);
+      submitData.append('file', formData.file);
+
+      // Kirim langsung ke backend dalam 1 kali request
+      await pengajuanService.create(submitData);
+      
+      Swal.fire({
+        title: 'Berhasil!',
+        text: 'Pengajuan Anda berhasil dikirim ke Dosen/Admin.',
+        icon: 'success',
+        confirmButtonColor: '#2563EB',
+      }).then(() => {
+        // Redirect ke halaman riwayat
+        navigate('/riwayat-pengajuan');
       });
-      // After success, go to riwayat page
-      navigate('/riwayat-pengajuan');
+
     } catch (err) {
       console.error('Pengajuan gagal', err);
-      // TODO: show user-friendly toast/alert
+      Swal.fire(
+        'Gagal Mengirim', 
+        err.response?.data?.detail || 'Terjadi kesalahan pada server. Coba lagi nanti.', 
+        'error'
+      );
     } finally {
       setSubmitting(false);
     }
@@ -63,73 +85,94 @@ export default function Pengajuan() {
   return (
     <MainLayout>
       <motion.div
-        className="max-w-3xl mx-auto p-6 bg-white rounded-xl shadow-lg mt-8"
+        className="max-w-3xl mx-auto p-8 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 mt-4"
         variants={container}
         initial="hidden"
         animate="visible"
       >
-        <motion.h2 className="text-2xl font-bold mb-6 text-gray-800" variants={item}>
-          Form Pengajuan Mahasiswa
-        </motion.h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <motion.div variants={item} className="mb-8 border-b border-gray-100 pb-4">
+          <h2 className="text-2xl font-extrabold text-gray-800 flex items-center gap-2">
+            <FileText className="text-blue-600" /> Form Pengajuan Baru
+          </h2>
+          <p className="text-gray-500 mt-1 text-sm">Isi formulir di bawah ini dengan lengkap untuk mengajukan Surat atau Tugas Akhir.</p>
+        </motion.div>
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <motion.div variants={item}>
+              <label className="block text-sm font-bold text-gray-700 mb-1.5">Jenis Pengajuan</label>
+              <select
+                name="jenis_pengajuan"
+                value={formData.jenis_pengajuan}
+                onChange={handleChange}
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+              >
+                <option value="Surat">Administrasi Surat</option>
+                <option value="Tugas Akhir">Tugas Akhir / Proposal</option>
+              </select>
+            </motion.div>
+
+            <motion.div variants={item}>
+              <label className="block text-sm font-bold text-gray-700 mb-1.5">Kategori / Topik</label>
+              <input
+                type="text"
+                name="kategori"
+                placeholder="Cth: Izin Riset, Cuti Akademik..."
+                value={formData.kategori}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+              />
+            </motion.div>
+          </div>
+
           <motion.div variants={item}>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Judul TA / Perihal Surat</label>
+            <label className="block text-sm font-bold text-gray-700 mb-1.5">Judul Perihal / Tugas Akhir</label>
             <input
               type="text"
-              name="judulTA"
-              value={formData.judulTA}
+              name="judul_perihal"
+              placeholder="Tuliskan judul proposal atau perihal surat secara lengkap"
+              value={formData.judul_perihal}
               onChange={handleChange}
               required
-              className="input-field w-full"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
             />
           </motion.div>
 
           <motion.div variants={item}>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Kategori Pengajuan</label>
-            <select
-              name="kategori"
-              value={formData.kategori}
-              onChange={handleChange}
-              className="input-field w-full"
-            >
-              <option>Surat Aktif Kuliah</option>
-              <option>Pengajuan Judul TA</option>
-              <option>Surat Izin Penelitian</option>
-            </select>
-          </motion.div>
-
-          <motion.div variants={item}>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Deskripsi / Abstrak Ringkas</label>
+            <label className="block text-sm font-bold text-gray-700 mb-1.5">Deskripsi / Abstrak Ringkas</label>
             <textarea
               name="deskripsi"
               rows={4}
+              placeholder="Jelaskan maksud dan tujuan pengajuan Anda di sini..."
               value={formData.deskripsi}
               onChange={handleChange}
               required
-              className="input-field w-full"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all resize-none"
             ></textarea>
           </motion.div>
 
-          <motion.div variants={item} className="flex items-center space-x-3">
-            <label className="block text-sm font-medium text-gray-700">Upload File (PDF)</label>
+          <motion.div variants={item} className="p-4 bg-blue-50 border-2 border-dashed border-blue-200 rounded-xl">
+            <label className="block text-sm font-bold text-gray-700 mb-2">Upload Dokumen Pendukung (Wajib PDF)</label>
             <input
               type="file"
               name="file"
               accept="application/pdf"
               onChange={handleChange}
-              className="file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+              required
+              className="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer"
             />
           </motion.div>
 
-          <motion.div variants={item} className="flex justify-end">
+          <motion.div variants={item} className="flex justify-end pt-4">
             <Button
               type="submit"
               variant="primary"
               disabled={submitting}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all"
             >
               <Send size={18} />
-              {submitting ? 'Mengirim...' : 'Kirim Pengajuan'}
+              {submitting ? 'Mengirim Data...' : 'Kirim Pengajuan'}
             </Button>
           </motion.div>
         </form>

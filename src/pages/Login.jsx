@@ -1,33 +1,32 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { 
-  User, 
-  Lock, 
-  Mail, 
-  Eye, 
-  EyeOff, 
-  Users, 
-  ChevronDown, 
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  User,
+  Lock,
+  Mail,
+  Eye,
+  EyeOff,
+  Users,
+  ChevronDown,
   Key,
-  GraduationCap
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Swal from 'sweetalert2';
-import { authService } from '../services';
+  GraduationCap,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import Swal from "sweetalert2";
+import { authService } from "../services";
 
 export default function Login() {
   const [isRegister, setIsRegister] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [nama, setNama] = useState('');
-  const [role, setRole] = useState('mahasiswa');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [nama, setNama] = useState("");
+  const [role, setRole] = useState("mahasiswa");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showDemo, setShowDemo] = useState(false);
   const navigate = useNavigate();
 
-  // Handle Login submission
-  const handleLogin = async (e) => {
+const handleLogin = async (e) => {
     e.preventDefault();
     if (!email || !password) {
       Swal.fire({
@@ -41,20 +40,23 @@ export default function Login() {
 
     setLoading(true);
     try {
-      // Map email input to authService login. If the user enters NIM/NIDN, it works as email.
-      const response = await authService.login(email, password);
+      // KUNCI PERBAIKAN: Mapping state 'email' menjadi 'username' untuk Backend
+      const response = await authService.login({ 
+        username: email, 
+        password: password 
+      });
       
-      // Save JWT token and user info to localStorage
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user || {
-        nama: response.data.nama || 'User Kampus',
-        email: email,
-        role: response.data.role || role
+      // Sesuaikan dengan struktur response dari Backend kamu
+      localStorage.setItem('token', response.access_token);
+      localStorage.setItem('user', JSON.stringify({
+        id: response.id,
+        nama: response.nama,
+        role: response.role
       }));
 
       Swal.fire({
         title: 'Berhasil Masuk!',
-        text: `Selamat datang kembali, ${response.data.user?.nama || 'Pengguna'}!`,
+        text: `Selamat datang kembali, ${response.nama || 'Pengguna'}!`,
         icon: 'success',
         timer: 1500,
         showConfirmButton: false
@@ -63,7 +65,7 @@ export default function Login() {
     } catch (err) {
       Swal.fire({
         title: 'Gagal Masuk',
-        text: err.response?.data?.message || 'Kredensial salah atau terjadi kesalahan pada server. Harap coba lagi atau gunakan Bypass Demo!',
+        text: err.response?.data?.detail || 'Kredensial salah atau terjadi kesalahan pada server.',
         icon: 'error',
         confirmButtonColor: '#1D63DC'
       });
@@ -72,7 +74,6 @@ export default function Login() {
     }
   };
 
-  // Handle Register submission
   const handleRegister = async (e) => {
     e.preventDefault();
     if (!nama || !email || !password) {
@@ -87,18 +88,25 @@ export default function Login() {
 
     setLoading(true);
     try {
-      await authService.register({ nama, email, password, role });
+      // KUNCI PERBAIKAN: Mapping state 'email' menjadi 'username'
+      await authService.register({ 
+        username: email, 
+        nama: nama, 
+        password: password, 
+        role: role 
+      });
+      
       Swal.fire({
         title: 'Pendaftaran Berhasil!',
         text: 'Akun Anda telah berhasil terdaftar. Silakan login.',
         icon: 'success',
         confirmButtonColor: '#1D63DC'
       });
-      setIsRegister(false); // Switch back to login tab
+      setIsRegister(false); 
     } catch (err) {
       Swal.fire({
         title: 'Pendaftaran Gagal',
-        text: err.response?.data?.message || 'Registrasi gagal. Email mungkin sudah terdaftar.',
+        text: err.response?.data?.detail || 'Registrasi gagal. Cek kembali data Anda.',
         icon: 'error',
         confirmButtonColor: '#1D63DC'
       });
@@ -109,21 +117,20 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-[#F1F5F9] flex items-center justify-center p-4 md:p-8 font-sans">
-      
-      {/* Main card box container matching the mockup shape and shadow */}
       <div className="w-full max-w-5xl bg-white rounded-3xl overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-gray-150 flex flex-col md:flex-row">
-        
-        {/* LEFT COLUMN: Blue Banner with Logo, Welcome and Academic Illustration */}
         <div className="w-full md:w-[45%] bg-[#EAF1FF] p-8 md:p-10 flex flex-col justify-between items-start relative overflow-hidden">
-          
           {/* Logo & Sub-header */}
           <div className="flex items-center gap-3 z-10">
             <div className="bg-[#1D63DC] p-2 rounded-xl text-white shadow-sm">
               <GraduationCap className="w-6 h-6" />
             </div>
             <div className="text-left">
-              <h2 className="font-bold text-sm tracking-wide text-[#1E293B] uppercase">SISTEM AKADEMIK</h2>
-              <p className="text-xs text-[#1D63DC] font-semibold">Universitas UIN SUSKA RIAU</p>
+              <h2 className="font-bold text-sm tracking-wide text-[#1E293B] uppercase">
+                SISTEM AKADEMIK
+              </h2>
+              <p className="text-xs text-[#1D63DC] font-semibold">
+                Universitas UIN SUSKA RIAU
+              </p>
             </div>
           </div>
 
@@ -138,9 +145,9 @@ export default function Login() {
 
             {/* Custom Illustration */}
             <div className="w-full max-w-[340px] mx-auto mt-6">
-              <img 
-                src="/login_illustration.png" 
-                alt="Ilustrasi Akademik" 
+              <img
+                src="/login_illustration.png"
+                alt="Ilustrasi Akademik"
                 className="w-full h-auto object-contain hover:scale-[1.02] transition-transform duration-300"
               />
             </div>
@@ -158,19 +165,18 @@ export default function Login() {
 
         {/* RIGHT COLUMN: White Interactive Portal Forms */}
         <div className="w-full md:w-[55%] p-8 md:p-12 flex flex-col justify-center bg-white text-left">
-          
           {/* TAB NAVIGATION: Login vs Register */}
           <div className="flex border-b border-gray-200 mb-8 w-full">
             <button
               onClick={() => {
                 setIsRegister(false);
-                setEmail('');
-                setPassword('');
+                setEmail("");
+                setPassword("");
               }}
               className={`flex-1 pb-4 text-center font-bold text-lg transition-all border-b-2 relative ${
                 !isRegister
-                  ? 'text-[#1D63DC] border-[#1D63DC]'
-                  : 'text-[#94A3B8] border-transparent hover:text-gray-600'
+                  ? "text-[#1D63DC] border-[#1D63DC]"
+                  : "text-[#94A3B8] border-transparent hover:text-gray-600"
               }`}
             >
               Login
@@ -184,13 +190,13 @@ export default function Login() {
             <button
               onClick={() => {
                 setIsRegister(true);
-                setEmail('');
-                setPassword('');
+                setEmail("");
+                setPassword("");
               }}
               className={`flex-1 pb-4 text-center font-bold text-lg transition-all border-b-2 relative ${
                 isRegister
-                  ? 'text-[#1D63DC] border-[#1D63DC]'
-                  : 'text-[#94A3B8] border-transparent hover:text-gray-600'
+                  ? "text-[#1D63DC] border-[#1D63DC]"
+                  : "text-[#94A3B8] border-transparent hover:text-gray-600"
               }`}
             >
               Register
@@ -216,8 +222,12 @@ export default function Login() {
                 className="space-y-6"
               >
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-extrabold text-[#1E293B]">Masuk ke Akun Anda</h2>
-                  <p className="text-xs sm:text-sm text-[#94A3B8] mt-1 font-medium">Gunakan akun yang telah terdaftar</p>
+                  <h2 className="text-xl sm:text-2xl font-extrabold text-[#1E293B]">
+                    Masuk ke Akun Anda
+                  </h2>
+                  <p className="text-xs sm:text-sm text-[#94A3B8] mt-1 font-medium">
+                    Gunakan akun yang telah terdaftar
+                  </p>
                 </div>
 
                 <form onSubmit={handleLogin} className="space-y-5">
@@ -250,7 +260,7 @@ export default function Login() {
                         <Lock className="w-5 h-5" />
                       </div>
                       <input
-                        type={showPassword ? 'text' : 'password'}
+                        type={showPassword ? "text" : "password"}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Masukkan password"
@@ -261,7 +271,11 @@ export default function Login() {
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
                       >
-                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        {showPassword ? (
+                          <EyeOff className="w-5 h-5" />
+                        ) : (
+                          <Eye className="w-5 h-5" />
+                        )}
                       </button>
                     </div>
                   </div>
@@ -296,20 +310,22 @@ export default function Login() {
                     disabled={loading}
                     className="w-full py-3 bg-[#1D63DC] hover:bg-[#154db3] disabled:bg-blue-300 text-white text-sm font-bold rounded-xl transition-colors shadow-sm shadow-blue-200 mt-2 flex items-center justify-center gap-2"
                   >
-                    {loading ? 'Menghubungkan...' : 'Masuk'}
+                    {loading ? "Menghubungkan..." : "Masuk"}
                   </button>
                 </form>
 
                 {/* Divider Line */}
                 <div className="relative flex py-2 items-center">
                   <div className="flex-grow border-t border-gray-150"></div>
-                  <span className="flex-shrink mx-4 text-xs font-semibold text-[#94A3B8]">atau</span>
+                  <span className="flex-shrink mx-4 text-xs font-semibold text-[#94A3B8]">
+                    atau
+                  </span>
                   <div className="flex-grow border-t border-gray-150"></div>
                 </div>
 
                 <div className="text-center">
                   <p className="text-xs sm:text-sm text-gray-500 font-medium">
-                    Belum punya akun?{' '}
+                    Belum punya akun?{" "}
                     <button
                       onClick={() => setIsRegister(true)}
                       className="text-[#1D63DC] font-bold hover:underline"
@@ -330,8 +346,12 @@ export default function Login() {
                 className="space-y-6"
               >
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-extrabold text-[#1E293B]">Daftar Akun Baru</h2>
-                  <p className="text-xs sm:text-sm text-[#94A3B8] mt-1 font-medium">Lengkapi data untuk mendaftar</p>
+                  <h2 className="text-xl sm:text-2xl font-extrabold text-[#1E293B]">
+                    Daftar Akun Baru
+                  </h2>
+                  <p className="text-xs sm:text-sm text-[#94A3B8] mt-1 font-medium">
+                    Lengkapi data untuk mendaftar
+                  </p>
                 </div>
 
                 <form onSubmit={handleRegister} className="space-y-4">
@@ -383,7 +403,7 @@ export default function Login() {
                         <Lock className="w-5 h-5" />
                       </div>
                       <input
-                        type={showPassword ? 'text' : 'password'}
+                        type={showPassword ? "text" : "password"}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Buat password minimal 6 karakter"
@@ -394,7 +414,11 @@ export default function Login() {
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
                       >
-                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        {showPassword ? (
+                          <EyeOff className="w-5 h-5" />
+                        ) : (
+                          <Eye className="w-5 h-5" />
+                        )}
                       </button>
                     </div>
                   </div>
@@ -429,20 +453,22 @@ export default function Login() {
                     disabled={loading}
                     className="w-full py-3 bg-[#1D63DC] hover:bg-[#154db3] disabled:bg-blue-300 text-white text-sm font-bold rounded-xl transition-colors shadow-sm shadow-blue-200 mt-4 flex items-center justify-center gap-2"
                   >
-                    {loading ? 'Mendaftarkan...' : 'Daftar Sekarang'}
+                    {loading ? "Mendaftarkan..." : "Daftar Sekarang"}
                   </button>
                 </form>
 
                 {/* Divider Line */}
                 <div className="relative flex py-2 items-center">
                   <div className="flex-grow border-t border-gray-150"></div>
-                  <span className="flex-shrink mx-4 text-xs font-semibold text-[#94A3B8]">atau</span>
+                  <span className="flex-shrink mx-4 text-xs font-semibold text-[#94A3B8]">
+                    atau
+                  </span>
                   <div className="flex-grow border-t border-gray-150"></div>
                 </div>
 
                 <div className="text-center">
                   <p className="text-xs sm:text-sm text-gray-500 font-medium">
-                    Sudah memiliki akun?{' '}
+                    Sudah memiliki akun?{" "}
                     <button
                       onClick={() => setIsRegister(false)}
                       className="text-[#1D63DC] font-bold hover:underline"
@@ -466,7 +492,9 @@ export default function Login() {
             className="flex items-center justify-center w-12 h-12 bg-[#1E293B] text-white hover:bg-slate-700 rounded-full shadow-lg border-2 border-slate-600 transition-transform active:scale-95 focus:outline-none"
             title="Akses Demo Developer"
           >
-            <Key className={`w-5 h-5 ${showDemo ? 'rotate-45 text-yellow-400' : ''} transition-transform duration-200`} />
+            <Key
+              className={`w-5 h-5 ${showDemo ? "rotate-45 text-yellow-400" : ""} transition-transform duration-200`}
+            />
           </button>
 
           {/* Quick-select Demo Credential Panel */}
@@ -483,7 +511,8 @@ export default function Login() {
                     <span>💡</span> Demo Access Panel
                   </h3>
                   <p className="text-[10px] text-slate-400 mt-1 leading-normal">
-                    Pilih akun simulasi di bawah untuk mengisi formulir secara otomatis, atau bypass autentikasi jika server offline.
+                    Pilih akun simulasi di bawah untuk mengisi formulir secara
+                    otomatis, atau bypass autentikasi jika server offline.
                   </p>
                 </div>
 
@@ -491,49 +520,61 @@ export default function Login() {
                   {/* Mahasiswa Account Option */}
                   <button
                     onClick={() => {
-                      setEmail('mahasiswa@kampus.ac.id');
-                      setPassword('password');
-                      setRole('mahasiswa');
+                      setEmail("mahasiswa@kampus.ac.id");
+                      setPassword("password");
+                      setRole("mahasiswa");
                     }}
                     className="w-full p-2.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 rounded-xl text-xs font-semibold flex items-center justify-between text-left transition-colors"
                   >
                     <div>
                       <p className="text-slate-200">Mahasiswa Account</p>
-                      <p className="text-[9px] text-slate-400 mt-0.5">mahasiswa@kampus.ac.id / password</p>
+                      <p className="text-[9px] text-slate-400 mt-0.5">
+                        mahasiswa@kampus.ac.id / password
+                      </p>
                     </div>
-                    <span className="text-[9px] bg-blue-500/20 text-blue-400 font-bold px-2 py-0.5 rounded">MHS</span>
+                    <span className="text-[9px] bg-blue-500/20 text-blue-400 font-bold px-2 py-0.5 rounded">
+                      MHS
+                    </span>
                   </button>
 
                   {/* Dosen Account Option */}
                   <button
                     onClick={() => {
-                      setEmail('dosen@kampus.ac.id');
-                      setPassword('password');
-                      setRole('dosen');
+                      setEmail("dosen@kampus.ac.id");
+                      setPassword("password");
+                      setRole("dosen");
                     }}
                     className="w-full p-2.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 rounded-xl text-xs font-semibold flex items-center justify-between text-left transition-colors"
                   >
                     <div>
                       <p className="text-slate-200">Dosen Account</p>
-                      <p className="text-[9px] text-slate-400 mt-0.5">dosen@kampus.ac.id / password</p>
+                      <p className="text-[9px] text-slate-400 mt-0.5">
+                        dosen@kampus.ac.id / password
+                      </p>
                     </div>
-                    <span className="text-[9px] bg-emerald-500/20 text-emerald-400 font-bold px-2 py-0.5 rounded">DSN</span>
+                    <span className="text-[9px] bg-emerald-500/20 text-emerald-400 font-bold px-2 py-0.5 rounded">
+                      DSN
+                    </span>
                   </button>
 
                   {/* Admin Account Option */}
                   <button
                     onClick={() => {
-                      setEmail('admin@kampus.ac.id');
-                      setPassword('password');
-                      setRole('admin');
+                      setEmail("admin@kampus.ac.id");
+                      setPassword("password");
+                      setRole("admin");
                     }}
                     className="w-full p-2.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 rounded-xl text-xs font-semibold flex items-center justify-between text-left transition-colors"
                   >
                     <div>
                       <p className="text-slate-200">Admin Account</p>
-                      <p className="text-[9px] text-slate-400 mt-0.5">admin@kampus.ac.id / password</p>
+                      <p className="text-[9px] text-slate-400 mt-0.5">
+                        admin@kampus.ac.id / password
+                      </p>
                     </div>
-                    <span className="text-[9px] bg-yellow-500/20 text-yellow-400 font-bold px-2 py-0.5 rounded">ADM</span>
+                    <span className="text-[9px] bg-yellow-500/20 text-yellow-400 font-bold px-2 py-0.5 rounded">
+                      ADM
+                    </span>
                   </button>
                 </div>
 
@@ -541,23 +582,41 @@ export default function Login() {
                 <button
                   onClick={() => {
                     const fakeUserObj = {
-                      mahasiswa: { nama: 'Muhammad Aji', email: 'mahasiswa@kampus.ac.id', role: 'mahasiswa' },
-                      dosen: { nama: 'Dr. Sukarno', email: 'dosen@kampus.ac.id', role: 'dosen' },
-                      admin: { nama: 'Admin E-Office', email: 'admin@kampus.ac.id', role: 'admin' },
+                      mahasiswa: {
+                        nama: "Muhammad Aji",
+                        email: "mahasiswa@kampus.ac.id",
+                        role: "mahasiswa",
+                      },
+                      dosen: {
+                        nama: "Dr. Sukarno",
+                        email: "dosen@kampus.ac.id",
+                        role: "dosen",
+                      },
+                      admin: {
+                        nama: "Admin E-Office",
+                        email: "admin@kampus.ac.id",
+                        role: "admin",
+                      },
                     };
-                    const selectedUser = fakeUserObj[role] || fakeUserObj.mahasiswa;
+                    const selectedUser =
+                      fakeUserObj[role] || fakeUserObj.mahasiswa;
 
-                    localStorage.setItem('token', 'mock-jwt-token-header.' + btoa(JSON.stringify(selectedUser)) + '.signature');
-                    localStorage.setItem('user', JSON.stringify(selectedUser));
+                    localStorage.setItem(
+                      "token",
+                      "mock-jwt-token-header." +
+                        btoa(JSON.stringify(selectedUser)) +
+                        ".signature",
+                    );
+                    localStorage.setItem("user", JSON.stringify(selectedUser));
 
                     Swal.fire({
-                      title: 'Demo Bypass Berhasil!',
+                      title: "Demo Bypass Berhasil!",
                       text: `Masuk sebagai ${selectedUser.nama} (${selectedUser.role})`,
-                      icon: 'success',
+                      icon: "success",
                       timer: 1500,
                       showConfirmButton: false,
                     });
-                    navigate('/dashboard');
+                    navigate("/dashboard");
                   }}
                   className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-colors shadow-sm"
                 >
@@ -568,7 +627,6 @@ export default function Login() {
           </AnimatePresence>
         </div>
       </div>
-
     </div>
   );
 }

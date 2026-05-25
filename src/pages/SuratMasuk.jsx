@@ -3,7 +3,7 @@ import { MainLayout } from '../layouts';
 import { Table, Button, Card } from '../components';
 import { Search, Plus, Eye, Trash2, X, FileText, Calendar, User, Hash, Edit3 } from 'lucide-react';
 import { formatDate } from '../utils';
-import { suratService } from '../services';
+import { dosenService } from '../services';
 import Swal from 'sweetalert2';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -36,7 +36,7 @@ export default function SuratMasuk() {
   const loadLetters = async () => {
     setLoading(true);
     try {
-      const response = await suratService.getMasuk(currentPage, limit);
+      const response = await dosenService.getPengajuanMasuk(currentPage, limit);
       // Backend paginated structure or fallback
       const data = response.data.data || response.data || [];
       const total = response.data.total || data.length || 0;

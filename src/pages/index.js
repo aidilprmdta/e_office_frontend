@@ -1,7 +1,7 @@
 export { default as Login } from "./Login";
 export { default as Dashboard } from "./Dashboard";
 export { default as SuratMasuk } from "./SuratMasuk";
-export { default as SuratKeluar } from "./SuratKeluar";
+export { default as SuratKeluar } from "./RiwayatPengajuan";
 export { default as TugasAkhir } from "./TugasAkhir";
 export { default as Persetujuan } from "./Persetujuan";
 export { default as ManajemenUser } from "./ManajemenUser";

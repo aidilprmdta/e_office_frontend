@@ -1,6 +1,6 @@
 import './index.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Login, Dashboard, SuratMasuk, SuratKeluar, TugasAkhir, Persetujuan, ManajemenUser, NotFound, Landing } from './pages';
+import { Login, Dashboard, SuratMasuk, SuratKeluar, TugasAkhir, Persetujuan, ManajemenUser, NotFound, Landing, Pengajuan, Riwayat } from './pages';
 import { isAuthenticated, getUserRole } from './utils';
 
 // Protected Route Component with Role Protection
@@ -79,6 +79,24 @@ export default function App() {
           }
         />
 
+        {/* Pengajuan Mahasiswa */}
+        <Route
+          path="/pengajuan"
+          element={
+            <ProtectedRoute allowedRoles={['mahasiswa']}> // only mahasiswa can submit
+              <Pengajuan />
+            </ProtectedRoute>
+          }
+        />
+        {/* Riwayat Pengajuan Mahasiswa */}
+        <Route
+          path="/riwayat-pengajuan"
+          element={
+            <ProtectedRoute allowedRoles={['mahasiswa']}>
+              <Riwayat />
+            </ProtectedRoute>
+          }
+        />
         {/* Default Routes */}
         <Route path="*" element={<NotFound />} />
       </Routes>

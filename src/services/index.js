@@ -1,5 +1,11 @@
 import apiClient from './api';
 
+export const pengajuanService = {
+  getList: (page = 1, limit = 10) => apiClient.get(`/pengajuan?page=${page}&limit=${limit}`),
+  getDetail: (id) => apiClient.get(`/pengajuan/${id}`),
+  create: (data) => apiClient.post('/pengajuan', data),
+};
+
 export const authService = {
   login: (email, password) => apiClient.post('/auth/login', { email, password }),
   register: (data) => apiClient.post('/auth/register', data),

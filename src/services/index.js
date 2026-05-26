@@ -12,7 +12,7 @@ export const authService = {
 
 export const pengajuanService = {
   getRiwayat: () => apiClient.get("/mahasiswa/pengajuan/me"),
-  
+  getList: () => apiClient.get("/mahasiswa/pengajuan"), 
   create: (data) => {
     return apiClient.post("/mahasiswa/pengajuan", data, {
       headers: {

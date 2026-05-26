@@ -40,19 +40,20 @@ const handleLogin = async (e) => {
 
     setLoading(true);
     try {
-      // KUNCI PERBAIKAN: Mapping state 'email' menjadi 'username' untuk Backend
-      const response = await authService.login({ 
-        username: email, 
-        password: password 
-      });
-      
-      // Sesuaikan dengan struktur response dari Backend kamu
-      localStorage.setItem('token', response.access_token);
-      localStorage.setItem('user', JSON.stringify({
-        id: response.id,
-        nama: response.nama,
-        role: response.role
-      }));
+     const response = await authService.login({ 
+  username: email, 
+  password: password 
+});
+
+const token = response.data.access_token;
+const payload = JSON.parse(atob(token.split('.')[1]));
+
+localStorage.setItem('token', token);
+localStorage.setItem('user', JSON.stringify({
+  id: payload.id,
+  nama: response.data.nama,
+  role: payload.role
+}));
 
       Swal.fire({
         title: 'Berhasil Masuk!',

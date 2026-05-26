@@ -1,5 +1,7 @@
 export { default as Login } from "./Login";
 export { default as Dashboard } from "./Dashboard";
+export { default as DashboardDosen } from "./DashboardDosen";
+export { default as DashboardAdmin } from "./DashboardAdmin";
 export { default as SuratMasuk } from "./SuratMasuk";
 export { default as SuratKeluar } from "./RiwayatPengajuan";
 export { default as TugasAkhir } from "./TugasAkhir";

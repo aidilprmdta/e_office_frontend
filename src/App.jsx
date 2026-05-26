@@ -1,7 +1,26 @@
-import './index.css';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Login, Dashboard, SuratMasuk, SuratKeluar, TugasAkhir, Persetujuan, ManajemenUser, NotFound, Landing, Pengajuan, Riwayat } from './pages';
-import { isAuthenticated, getUserRole } from './utils';
+import "./index.css";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import {
+  Login,
+  Dashboard,
+  DashboardDosen,
+  DashboardAdmin,
+  SuratMasuk,
+  SuratKeluar,
+  TugasAkhir,
+  Persetujuan,
+  ManajemenUser,
+  NotFound,
+  Landing,
+  Pengajuan,
+  Riwayat,
+} from "./pages";
+import { isAuthenticated, getUserRole } from "./utils";
 
 // Protected Route Component with Role Protection
 function ProtectedRoute({ children, allowedRoles }) {
@@ -10,9 +29,9 @@ function ProtectedRoute({ children, allowedRoles }) {
   }
 
   if (allowedRoles) {
-    const userString = localStorage.getItem('user');
+    const userString = localStorage.getItem("user");
     const userRole = userString ? JSON.parse(userString).role : getUserRole();
-    
+
     if (!allowedRoles.includes(userRole)) {
       return <Navigate to="/dashboard" replace />;
     }
@@ -22,6 +41,12 @@ function ProtectedRoute({ children, allowedRoles }) {
 }
 
 export default function App() {
+  // Ambil role user dari localStorage
+  const userString = localStorage.getItem("user");
+  const userRole = userString
+    ? JSON.parse(userString).role?.toLowerCase()
+    : null;
+    
   return (
     <Router>
       <Routes>
@@ -29,12 +54,18 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<Landing />} />
 
-        {/* Protected Routes */}
+        {/* Protected Dashboard Routes by Role */}
         <Route
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              {userRole === "dosen" ? (
+                <DashboardDosen />
+              ) : userRole === "admin" ? (
+                <DashboardAdmin />
+              ) : (
+                <Dashboard />
+              )}
             </ProtectedRoute>
           }
         />
@@ -65,7 +96,7 @@ export default function App() {
         <Route
           path="/persetujuan"
           element={
-            <ProtectedRoute allowedRoles={['dosen', 'admin']}>
+            <ProtectedRoute allowedRoles={["dosen", "admin"]}>
               <Persetujuan />
             </ProtectedRoute>
           }
@@ -73,7 +104,7 @@ export default function App() {
         <Route
           path="/users"
           element={
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={["admin"]}>
               <ManajemenUser />
             </ProtectedRoute>
           }
@@ -83,7 +114,9 @@ export default function App() {
         <Route
           path="/pengajuan"
           element={
-            <ProtectedRoute allowedRoles={['mahasiswa']}> // only mahasiswa can submit
+            <ProtectedRoute allowedRoles={["mahasiswa"]}>
+              {" "}
+              // only mahasiswa can submit
               <Pengajuan />
             </ProtectedRoute>
           }
@@ -92,7 +125,7 @@ export default function App() {
         <Route
           path="/riwayat-pengajuan"
           element={
-            <ProtectedRoute allowedRoles={['mahasiswa']}>
+            <ProtectedRoute allowedRoles={["mahasiswa"]}>
               <Riwayat />
             </ProtectedRoute>
           }

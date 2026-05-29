@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { MainLayout } from '../layouts';
 import { Table, Button } from '../components';
 import { Search, Plus, Eye, Trash2, X, FileText, Calendar, Hash, Edit3, UploadCloud } from 'lucide-react';
-import { formatDate } from '../utils';
+import { formatDate, normalizeStatus, isPendingStatus, getStatusLabel, getUploadUrl } from '../utils';
 import { pengajuanService } from '../services';
 import Swal from 'sweetalert2';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -95,8 +95,8 @@ export default function RiwayatPengajuan() {
   };
 
   const handleDelete = async (id, status) => {
-    if (status !== 'Pending') {
-      Swal.fire('Ditolak', 'Hanya pengajuan berstatus Pending yang dapat dibatalkan.', 'error');
+    if (!isPendingStatus(status)) {
+      Swal.fire('Ditolak', 'Hanya pengajuan berstatus pending yang dapat dibatalkan.', 'error');
       return;
     }
 
@@ -131,7 +131,8 @@ export default function RiwayatPengajuan() {
     const matchSearch =
       (letter.judul_perihal || '').toLowerCase().includes(s) ||
       (letter.kategori || '').toLowerCase().includes(s);
-    const matchStatus = filterStatus === 'semua' || letter.status === filterStatus;
+    const matchStatus =
+      filterStatus === 'semua' || normalizeStatus(letter.status) === filterStatus;
     return matchSearch && matchStatus;
   });
 
@@ -151,19 +152,22 @@ export default function RiwayatPengajuan() {
     {
       key: 'status',
       label: 'Status',
-      render: (status) => (
-        <span
-          className={`px-3 py-1 rounded-full text-xs font-bold ${
-            status === 'Disetujui'
-              ? 'bg-green-100 text-green-700'
-              : status === 'Ditolak'
-              ? 'bg-red-100 text-red-700'
-              : 'bg-yellow-100 text-yellow-700'
-          }`}
-        >
-          {status || 'Pending'}
-        </span>
-      ),
+      render: (status) => {
+        const s = normalizeStatus(status);
+        return (
+          <span
+            className={`px-3 py-1 rounded-full text-xs font-bold ${
+              s === 'disetujui'
+                ? 'bg-green-100 text-green-700'
+                : s === 'ditolak'
+                ? 'bg-red-100 text-red-700'
+                : 'bg-yellow-100 text-yellow-700'
+            }`}
+          >
+            {getStatusLabel(status)}
+          </span>
+        );
+      },
     },
     {
       key: 'id',
@@ -177,7 +181,7 @@ export default function RiwayatPengajuan() {
           >
             <Eye size={16} />
           </button>
-          {row.status === 'Pending' && (
+          {isPendingStatus(row.status) && (
             <button
               onClick={() => handleDelete(row.id, row.status)}
               className="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-md transition-colors"
@@ -226,9 +230,9 @@ export default function RiwayatPengajuan() {
               className="px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             >
               <option value="semua">Semua Status</option>
-              <option value="Disetujui">Disetujui</option>
-              <option value="Pending">Pending</option>
-              <option value="Ditolak">Ditolak</option>
+              <option value="disetujui">Disetujui</option>
+              <option value="pending">Pending</option>
+              <option value="ditolak">Ditolak</option>
             </select>
           </div>
         </div>
@@ -377,6 +381,17 @@ export default function RiwayatPengajuan() {
                       {selectedLetter.catatan_dosen}
                     </p>
                   </div>
+                )}
+
+                {selectedLetter.file_url && (
+                  <a
+                    href={getUploadUrl(selectedLetter.file_url)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:underline"
+                  >
+                    <FileText size={16} /> Unduh Dokumen PDF
+                  </a>
                 )}
               </div>
 

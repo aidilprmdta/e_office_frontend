@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { MainLayout } from '../layouts';
 import { Card, Table } from '../components';
 import { Check, X, Eye, FileText, AlertCircle, Search, Inbox } from 'lucide-react';
-import { formatDate } from '../utils';
+import { formatDate, isPendingStatus, normalizeStatus, getUploadUrl } from '../utils';
 import { dosenService } from '../services';
 import Swal from 'sweetalert2';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -20,9 +20,9 @@ export default function DosenDashboard() {
       const response = await dosenService.getPengajuanMasuk();
       const data = response.data || [];
       
-      const pending = data.filter(p => p.status.toLowerCase() === 'pending');
-      const approved = data.filter(p => p.status.toLowerCase() === 'disetujui').length;
-      const rejected = data.filter(p => p.status.toLowerCase() === 'ditolak').length;
+      const pending = data.filter((p) => isPendingStatus(p.status));
+      const approved = data.filter((p) => normalizeStatus(p.status) === 'disetujui').length;
+      const rejected = data.filter((p) => normalizeStatus(p.status) === 'ditolak').length;
 
       setPengajuanList(pending); // Dashboard dosen fokus ke yang butuh approval (Pending)
       setStats({
@@ -131,7 +131,7 @@ export default function DosenDashboard() {
           ${item.file_url ? `
             <div class="mt-4 p-2.5 bg-blue-50 rounded-lg flex items-center justify-between border border-blue-100">
               <span class="text-xs font-medium text-blue-700 flex items-center gap-1">📄 Lampiran Dokumen Terdeteksi</span>
-              <a href="${item.file_url}" target="_blank" rel="noreferrer" class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded font-bold transition-all shadow-sm">Preview PDF</a>
+              <a href="${getUploadUrl(item.file_url)}" target="_blank" rel="noreferrer" class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded font-bold transition-all shadow-sm">Preview PDF</a>
             </div>
           ` : '<p class="text-xs text-red-500 italic mt-2">Tidak ada lampiran file PDF.</p>'}
         </div>
@@ -172,23 +172,43 @@ export default function DosenDashboard() {
 
   return (
     <MainLayout>
-      <div className="space-y-6">
-        <div>
+      <motion.div
+        className="space-y-6"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ staggerChildren: 0.1, delayChildren: 0.05 }}
+      >
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: 'easeOut' }}
+        >
           <h1 className="text-3xl font-extrabold text-gray-800 flex items-center gap-2">
             <span>👨‍🏫</span> Ruang Evaluasi Dosen
           </h1>
           <p className="text-gray-500 mt-1">Periksa berkas administrasi dan pengajuan judul mahasiswa Teknik Informatika</p>
-        </div>
+        </motion.div>
 
         {/* Statistik Counters */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: 'easeOut', delay: 0.1 }}
+          className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+        >
           <Card icon="⏳" title="Menunggu Review" value={stats.pending} color="yellow" />
           <Card icon="✅" title="Telah Disetujui" value={stats.disetujui} color="green" />
           <Card icon="❌" title="Telah Ditolak" value={stats.ditolak} color="red" />
-        </div>
+        </motion.div>
 
         {/* Pencarian dan Tabel Utama */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: 'easeOut', delay: 0.2 }}
+          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6"
+        >
           <div className="relative mb-6">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
             <input
@@ -212,8 +232,8 @@ export default function DosenDashboard() {
               Tidak ada pengajuan mahasiswa yang berstatus pending.
             </div>
           )}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </MainLayout>
   );
 }

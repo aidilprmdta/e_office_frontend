@@ -1,3 +1,25 @@
+const API_ORIGIN =
+  import.meta.env.VITE_API_BASE_URL?.replace(/\/api\/?$/, '') ||
+  'http://localhost:8000';
+
+// Normalisasi status pengajuan (backend: pending | disetujui | ditolak)
+export const normalizeStatus = (status) => (status || 'pending').toLowerCase();
+
+export const isPendingStatus = (status) => normalizeStatus(status) === 'pending';
+
+export const getStatusLabel = (status) => {
+  const s = normalizeStatus(status);
+  if (s === 'disetujui') return 'Disetujui';
+  if (s === 'ditolak') return 'Ditolak';
+  return 'Pending';
+};
+
+export const getUploadUrl = (fileUrl) => {
+  if (!fileUrl) return null;
+  if (fileUrl.startsWith('http')) return fileUrl;
+  return `${API_ORIGIN}/uploads/${fileUrl}`;
+};
+
 // Format tanggal ke format Indonesia (DD Bulan YYYY)
 export const formatDate = (dateString) => {
   const date = new Date(dateString);
@@ -25,15 +47,52 @@ export const isAuthenticated = () => {
   return !!localStorage.getItem('token');
 };
 
-// Get role dari token (jika menggunakan JWT)
+
+export const normalizeRole = (role) => (role || 'mahasiswa').toString().trim().toLowerCase();
+
+export const getStoredUser = () => {
+  try {
+    const raw = localStorage.getItem('user');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return {
+      ...parsed,
+      role: normalizeRole(parsed.role),
+    };
+  } catch {
+    return null;
+  }
+};
+
+export const saveUserSession = (token, user) => {
+  localStorage.setItem('token', token);
+  localStorage.setItem(
+    'user',
+    JSON.stringify({
+      ...user,
+      role: normalizeRole(user.role),
+    }),
+  );
+  window.dispatchEvent(new Event('auth-change'));
+};
+
+export const clearUserSession = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  window.dispatchEvent(new Event('auth-change'));
+};
+
 export const getUserRole = () => {
+  const user = getStoredUser();
+  if (user?.role) return user.role;
+
   const token = localStorage.getItem('token');
   if (!token) return null;
-  
+
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload.role;
-  } catch (error) {
+    return normalizeRole(payload.role);
+  } catch {
     return null;
   }
 };
@@ -42,11 +101,11 @@ export const getUserRole = () => {
 export const hasRole = (requiredRole) => {
   const userRole = getUserRole();
   if (!userRole) return false;
-  
+
   if (Array.isArray(requiredRole)) {
-    return requiredRole.includes(userRole);
+    return requiredRole.map(normalizeRole).includes(userRole);
   }
-  return userRole === requiredRole;
+  return userRole === normalizeRole(requiredRole);
 };
 
 // Truncate teks panjang

@@ -3,7 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { MainLayout } from "../layouts";
 import { Card, Table, Button } from "../components";
 import { pengajuanService, dosenService, userService } from "../services";
-import { formatDate } from "../utils";
+import { formatDate, isPendingStatus } from "../utils";
+import { useAuth } from "../hooks/useAuth";
+import { adminService } from "../services";
 import {
   Mail,
   Send,
@@ -16,17 +18,12 @@ import {
   Users,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import PengajuanForm from "./Pengajuan";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-
-  // 1. AMBIL DATA USER YANG SEDANG LOGIN
-  const userString = localStorage.getItem("user");
-  const user = userString
-    ? JSON.parse(userString)
-    : { nama: "Pengguna", role: "mahasiswa" };
-  const userRole = user.role?.toLowerCase() || "mahasiswa";
+  const { user, role: userRole } = useAuth();
+  const effectiveRole = userRole || user?.role || "mahasiswa";
+  const displayUser = user || { nama: "Pengguna", role: "mahasiswa" };
 
   // 2. STATE UNTUK MENAMPUNG DATA API
   const [stats, setStats] = useState({
@@ -64,7 +61,7 @@ export default function Dashboard() {
         let totalUsr = 0;
         let recentData = [];
 
-        if (userRole === "mahasiswa") {
+        if (userRole === "mahasiswa" || effectiveRole === "mahasiswa") {
           const res = await pengajuanService.getRiwayat();
           const data = res.data || [];
           recentData = data;
@@ -75,8 +72,8 @@ export default function Dashboard() {
           totalTA = data.filter(
             (item) => item.jenis_pengajuan === "Tugas Akhir",
           ).length;
-          pending = data.filter((item) => item.status === "Pending").length;
-        } else if (userRole === "dosen") {
+          pending = data.filter((item) => isPendingStatus(item.status)).length;
+        } else if (userRole === "dosen" || effectiveRole === "dosen") {
           const res = await dosenService.getPengajuanMasuk();
           const data = res.data || [];
           recentData = data;
@@ -87,15 +84,19 @@ export default function Dashboard() {
           totalTA = data.filter(
             (item) => item.jenis_pengajuan === "Tugas Akhir",
           ).length;
-          pending = data.filter((item) => item.status === "Pending").length;
-        } else if (userRole === "admin") {
-          const res = await userService.getUsers();
-          const data = res.data || [];
+          pending = data.filter((item) => isPendingStatus(item.status)).length;
+        } else if (userRole === "admin" || effectiveRole === "admin") {
+          const [userRes, dashRes] = await Promise.all([
+            userService.getUsers(),
+            adminService.getDashboard(),
+          ]);
+          const data = userRes.data || [];
+          const dash = dashRes.data || {};
           totalUsr = data.length;
-
-          // Fallback dummy untuk surat jika di admin (karena admin belum ada API getAllSurat)
-          totalSurat = 120;
-          totalTA = 30;
+          totalSurat = dash.total_pengajuan ?? 0;
+          totalTA = dash.total_pending ?? 0;
+          pending = dash.total_pending ?? 0;
+          recentData = data.slice(0, 3);
         }
 
         setStats({
@@ -121,14 +122,14 @@ export default function Dashboard() {
     };
 
     loadDashboardData();
-  }, [userRole]);
+  }, [userRole, effectiveRole]);
 
   // 4. KONFIGURASI TAMPILAN BERDASARKAN ROLE (Menyambungkan State Stats)
   let statCards = [];
   let quickActions = [];
   let tableColumns = [];
 
-  if (userRole === "dosen") {
+  if (effectiveRole === "dosen") {
     statCards = [
       {
         icon: <Mail size={24} />,
@@ -174,7 +175,7 @@ export default function Dashboard() {
       { key: "judul_perihal", label: "Judul/Perihal" },
       { key: "status", label: "Status" },
     ];
-  } else if (userRole === "admin") {
+  } else if (effectiveRole === "admin") {
     statCards = [
       {
         icon: <Users size={24} />,
@@ -254,9 +255,16 @@ export default function Dashboard() {
       },
       {
         icon: <BookOpen size={20} />,
-        label: "Daftar Judul Tugas Akhir",
+        label: "Ajukan Judul TA",
         color:
           "bg-purple-50 hover:bg-purple-100 text-purple-600 border border-purple-200",
+        action: () => navigate("/pengajuan-judul-ta"),
+      },
+      {
+        icon: <BookOpen size={20} />,
+        label: "Lihat Daftar TA",
+        color:
+          "bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200",
         action: () => navigate("/tugas-akhir"),
       },
       {
@@ -314,12 +322,12 @@ export default function Dashboard() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10">
             <div>
               <h1 className="text-3xl md:text-4xl font-extrabold mb-2">
-                Selamat Datang, {user.nama}! 👋
+                Selamat Datang, {displayUser.nama}! 👋
               </h1>
               <p className="text-blue-100 text-base md:text-lg">
                 Hak Akses Anda:{" "}
                 <span className="font-bold uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded text-sm">
-                  {userRole}
+                  {effectiveRole}
                 </span>
               </p>
               <div className="flex gap-4 mt-4 text-blue-200 text-sm font-medium">
@@ -381,19 +389,6 @@ export default function Dashboard() {
             ))}
           </div>
         </motion.div>
-
-        {/* Formulir Pengajuan Terpadu (khusus mahasiswa) */}
-        {userRole === "mahasiswa" && (
-          <motion.div
-            variants={itemVariants}
-            className="bg-white rounded-xl shadow-md p-6 border border-blue-100"
-          >
-            <h2 className="text-xl font-bold text-blue-800 mb-4 flex items-center gap-2">
-              <span>📝</span> Formulir Pengajuan Terpadu
-            </h2>
-            <PengajuanForm />
-          </motion.div>
-        )}
 
         {/* Two Column Layout (Table & Activity) */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

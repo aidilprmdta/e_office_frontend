@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '../layouts';
 import { Table, Button } from '../components';
 import { Search, Eye, X, BookOpen, Calendar, Hash, FileText } from 'lucide-react';
-import { formatDate } from '../utils';
+import { formatDate, normalizeStatus, getStatusLabel, getUploadUrl } from '../utils';
 import { pengajuanService, dosenService } from '../services';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function TugasAkhir() {
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -77,19 +79,22 @@ export default function TugasAkhir() {
     {
       key: 'status',
       label: 'Status',
-      render: (status) => (
-        <span
-          className={`px-3 py-1 rounded-full text-xs font-bold ${
-            status === 'Disetujui'
-              ? 'bg-green-100 text-green-700'
-              : status === 'Ditolak'
-              ? 'bg-red-100 text-red-700'
-              : 'bg-yellow-100 text-yellow-700'
-          }`}
-        >
-          {status || 'Pending'}
-        </span>
-      ),
+      render: (status) => {
+        const s = normalizeStatus(status);
+        return (
+          <span
+            className={`px-3 py-1 rounded-full text-xs font-bold ${
+              s === 'disetujui'
+                ? 'bg-green-100 text-green-700'
+                : s === 'ditolak'
+                ? 'bg-red-100 text-red-700'
+                : 'bg-yellow-100 text-yellow-700'
+            }`}
+          >
+            {getStatusLabel(status)}
+          </span>
+        );
+      },
     },
     {
       key: 'id',
@@ -118,11 +123,16 @@ export default function TugasAkhir() {
               <span>🎓</span> Daftar Tugas Akhir
             </h1>
             <p className="text-gray-600 mt-1">
-              {userRole === 'mahasiswa' 
-                ? 'Pantau status pengajuan judul Tugas Akhir Anda' 
+              {userRole === 'mahasiswa'
+                ? 'Pantau status pengajuan judul TA Anda'
                 : 'Daftar pengajuan judul Tugas Akhir mahasiswa'}
             </p>
           </div>
+          {userRole === 'mahasiswa' && (
+            <Button variant="primary" onClick={() => navigate('/pengajuan-judul-ta')}>
+              + Ajukan Judul TA Baru
+            </Button>
+          )}
         </div>
 
         {/* Filter & Search */}
@@ -152,7 +162,12 @@ export default function TugasAkhir() {
               <Table columns={columns} data={filteredTasks} />
             ) : (
               <div className="text-center py-8 text-gray-500">
-                Belum ada data pengajuan Tugas Akhir.
+                <p className="mb-4">Belum ada data pengajuan Tugas Akhir.</p>
+                {userRole === 'mahasiswa' && (
+                  <Button variant="primary" onClick={() => navigate('/pengajuan-judul-ta')}>
+                    Ajukan Judul TA Sekarang
+                  </Button>
+                )}
               </div>
             )
           )}
@@ -214,6 +229,17 @@ export default function TugasAkhir() {
                       {selectedTask.catatan_dosen}
                     </p>
                   </div>
+                )}
+
+                {selectedTask.file_url && (
+                  <a
+                    href={getUploadUrl(selectedTask.file_url)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:underline"
+                  >
+                    <FileText size={16} /> Unduh Dokumen PDF
+                  </a>
                 )}
               </div>
 

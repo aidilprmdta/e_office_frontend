@@ -24,25 +24,23 @@ export default function ManajemenUser() {
   // Form States
   const [createFormData, setCreateFormData] = useState({
     nama: '',
-    email: '',
+    username: '',
     password: '',
     role: 'mahasiswa',
   });
 
   const [editFormData, setEditFormData] = useState({
     nama: '',
-    email: '',
     role: 'mahasiswa',
   });
 
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const response = await userService.getUsers(currentPage, limit);
-      const data = response.data.data || response.data || [];
-      const total = response.data.total || data.length || 0;
+      const response = await userService.getUsers();
+      const data = response.data || [];
       setUsers(data);
-      setTotalPages(Math.ceil(total / limit) || 1);
+      setTotalPages(Math.max(1, Math.ceil(data.length / limit)));
     } catch (err) {
       console.warn('Failed to load users from API. Using fallback mock data.');
       const mockData = [
@@ -82,7 +80,12 @@ export default function ManajemenUser() {
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
-      await userService.createUser(createFormData);
+      await userService.createUser({
+        username: createFormData.username,
+        nama: createFormData.nama,
+        password: createFormData.password,
+        role: createFormData.role,
+      });
       Swal.fire({
         title: 'Berhasil!',
         text: 'User baru berhasil dibuat.',
@@ -92,7 +95,7 @@ export default function ManajemenUser() {
       setShowCreateModal(false);
       setCreateFormData({
         nama: '',
-        email: '',
+        username: '',
         password: '',
         role: 'mahasiswa',
       });
@@ -119,7 +122,6 @@ export default function ManajemenUser() {
     setSelectedUser(user);
     setEditFormData({
       nama: user.nama || user.name || '',
-      email: user.email || '',
       role: user.role || 'mahasiswa',
     });
     setShowEditModal(true);
@@ -128,7 +130,10 @@ export default function ManajemenUser() {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      await userService.updateUser(selectedUser.id, editFormData);
+      await userService.updateUser(selectedUser.id, {
+        nama: editFormData.nama,
+        role: editFormData.role,
+      });
       Swal.fire({
         title: 'Diperbarui!',
         text: 'Data user berhasil diperbarui.',
@@ -211,7 +216,7 @@ export default function ManajemenUser() {
 
   const filteredUsers = users.filter((user) =>
     (user.nama || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (user.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (user.username || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     (user.role || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -221,24 +226,17 @@ export default function ManajemenUser() {
       label: 'Nama Lengkap',
       render: (val) => <span className="font-bold text-gray-800">{val}</span>
     },
-    { key: 'email', label: 'Email Kampus' },
+    {
+      key: 'username',
+      label: 'Username (NIM/NIDN)',
+      render: (val) => <span className="font-mono text-sm text-gray-700">{val}</span>,
+    },
     {
       key: 'role',
       label: 'Role Hak Akses',
       render: (role) => (
         <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getRoleBadge(role)}`}>
           {getRoleLabel(role)}
-        </span>
-      ),
-    },
-    {
-      key: 'status',
-      label: 'Status',
-      render: (status) => (
-        <span className={`px-2 py-0.5 rounded text-xs font-bold ${
-          status === 'Aktif' || !status ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-700'
-        }`}>
-          {status || 'Aktif'}
         </span>
       ),
     },
@@ -295,7 +293,7 @@ export default function ManajemenUser() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
             <input
               type="text"
-              placeholder="Cari nama, email, atau role..."
+              placeholder="Cari nama, username, atau role..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
@@ -385,14 +383,14 @@ export default function ManajemenUser() {
 
                 <div>
                   <label className="flex text-sm font-semibold text-gray-700 mb-1 items-center gap-1.5">
-                    <Mail size={16} className="text-gray-400" /> Email Kampus
+                    <User size={16} className="text-gray-400" /> Username (NIM / NIDN)
                   </label>
                   <input
-                    type="email"
+                    type="text"
                     required
-                    placeholder="nama@kampus.ac.id"
-                    value={createFormData.email}
-                    onChange={(e) => setCreateFormData({...createFormData, email: e.target.value})}
+                    placeholder="Contoh: 22010001 atau dosen01"
+                    value={createFormData.username}
+                    onChange={(e) => setCreateFormData({...createFormData, username: e.target.value})}
                     className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 focus:bg-white"
                   />
                 </div>
@@ -483,19 +481,6 @@ export default function ManajemenUser() {
 
                 <div>
                   <label className="flex text-sm font-semibold text-gray-700 mb-1 items-center gap-1.5">
-                    <Mail size={16} className="text-gray-400" /> Email Kampus
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={editFormData.email}
-                    onChange={(e) => setEditFormData({...editFormData, email: e.target.value})}
-                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 focus:bg-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="flex text-sm font-semibold text-gray-700 mb-1 items-center gap-1.5">
                     <Shield size={16} className="text-gray-400" /> Hak Akses / Role
                   </label>
                   <select
@@ -508,6 +493,10 @@ export default function ManajemenUser() {
                     <option value="admin">Administrator</option>
                   </select>
                 </div>
+
+                <p className="text-xs text-gray-500">
+                  Username: <span className="font-mono font-bold">{selectedUser?.username}</span> (tidak dapat diubah)
+                </p>
 
                 <div className="flex justify-end gap-2 pt-4 border-t border-gray-200">
                   <Button variant="secondary" type="button" onClick={() => setShowEditModal(false)}>

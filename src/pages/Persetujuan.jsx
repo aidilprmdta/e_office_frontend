@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { MainLayout } from '../layouts';
 import { Table, Card } from '../components';
 import { Check, X, Search, Eye, FileText, User, Calendar, Hash } from 'lucide-react';
-import { formatDate } from '../utils';
+import { formatDate, normalizeStatus, isPendingStatus, getUploadUrl } from '../utils';
 import { dosenService } from '../services';
 import Swal from 'sweetalert2';
 
@@ -25,9 +25,9 @@ export default function Persetujuan() {
       const response = await dosenService.getPengajuanMasuk();
       const data = response.data || [];
       
-      const pendingList = data.filter(l => l.status === 'Pending');
-      const approvedCount = data.filter(l => l.status === 'Disetujui').length;
-      const rejectedCount = data.filter(l => l.status === 'Ditolak').length;
+      const pendingList = data.filter((l) => isPendingStatus(l.status));
+      const approvedCount = data.filter((l) => normalizeStatus(l.status) === 'disetujui').length;
+      const rejectedCount = data.filter((l) => normalizeStatus(l.status) === 'ditolak').length;
 
       // Di halaman persetujuan, kita biasanya hanya menampilkan yang masih Pending
       setLetters(pendingList);
@@ -87,9 +87,9 @@ export default function Persetujuan() {
     if (catatan !== undefined) { // Confirm button clicked
       try {
         // Mengirim data status dan catatan ke FastAPI
-        await dosenService.updateStatus(id, { 
-          status: 'Disetujui', 
-          catatan_dosen: catatan || 'Disetujui tanpa catatan.' 
+        await dosenService.updateStatus(id, {
+          status: 'disetujui',
+          catatan_dosen: catatan || 'Disetujui tanpa catatan.',
         });
         
         Swal.fire('Disetujui!', 'Pengajuan berhasil disetujui.', 'success');
@@ -124,9 +124,9 @@ export default function Persetujuan() {
     if (reason) {
       try {
         // Mengirim data penolakan dan catatan ke FastAPI
-        await dosenService.updateStatus(id, { 
-          status: 'Ditolak', 
-          catatan_dosen: reason 
+        await dosenService.updateStatus(id, {
+          status: 'ditolak',
+          catatan_dosen: reason,
         });
         
         Swal.fire('Ditolak!', 'Pengajuan telah dikembalikan ke mahasiswa.', 'error');
@@ -154,7 +154,7 @@ export default function Persetujuan() {
             <p class="mb-1"><strong>Deskripsi / Abstrak:</strong></p>
             <p class="leading-relaxed text-gray-600 bg-white p-4 rounded-lg border border-gray-100 max-h-40 overflow-y-auto shadow-sm">${letter.deskripsi || 'Tidak ada deskripsi.'}</p>
           </div>
-          ${letter.file_path ? `<a href="#" class="text-blue-600 font-bold hover:underline text-xs flex items-center gap-1 mt-2">📄 Unduh Dokumen PDF</a>` : '<p class="text-xs text-red-500 italic mt-2">Tidak ada lampiran PDF.</p>'}
+          ${letter.file_url ? `<a href="${getUploadUrl(letter.file_url)}" target="_blank" rel="noreferrer" class="text-blue-600 font-bold hover:underline text-xs flex items-center gap-1 mt-2">📄 Unduh Dokumen PDF</a>` : '<p class="text-xs text-red-500 italic mt-2">Tidak ada lampiran PDF.</p>'}
         </div>
       `,
       showCancelButton: false,

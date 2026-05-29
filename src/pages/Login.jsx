@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   User,
   Lock,
@@ -14,9 +14,15 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import Swal from "sweetalert2";
 import { authService } from "../services";
+import { saveUserSession, normalizeRole } from "../utils";
 
-export default function Login() {
-  const [isRegister, setIsRegister] = useState(false);
+export default function Login({ initialTab }) {
+  const location = useLocation();
+  const [isRegister, setIsRegister] = useState(() => {
+    if (initialTab === "register") return true;
+    if (location.state && location.state.register) return true;
+    return false;
+  });
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nama, setNama] = useState("");
@@ -26,49 +32,51 @@ export default function Login() {
   const [showDemo, setShowDemo] = useState(false);
   const navigate = useNavigate();
 
-const handleLogin = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     if (!email || !password) {
       Swal.fire({
-        title: 'Oops!',
-        text: 'Harap masukkan username/NIM/NIDN dan password Anda.',
-        icon: 'warning',
-        confirmButtonColor: '#1D63DC'
+        title: "Oops!",
+        text: "Harap masukkan username/NIM/NIDN dan password Anda.",
+        icon: "warning",
+        confirmButtonColor: "#1D63DC",
       });
       return;
     }
 
     setLoading(true);
     try {
-     const response = await authService.login({ 
-  username: email, 
-  password: password 
-});
+      const response = await authService.login({
+        username: email,
+        password: password,
+      });
 
-const token = response.data.access_token;
-const payload = JSON.parse(atob(token.split('.')[1]));
+      const token = response.data.access_token;
+      const userData = response.data.user || {};
 
-localStorage.setItem('token', token);
-localStorage.setItem('user', JSON.stringify({
-  id: payload.id,
-  nama: response.data.nama,
-  role: payload.role
-}));
+      saveUserSession(token, {
+        id: userData.id,
+        username: userData.username,
+        nama: userData.nama ?? "Pengguna",
+        role: normalizeRole(userData.role),
+      });
 
       Swal.fire({
-        title: 'Berhasil Masuk!',
-        text: `Selamat datang kembali, ${response.nama || 'Pengguna'}!`,
-        icon: 'success',
+        title: "Berhasil Masuk!",
+        text: `Selamat datang kembali, ${userData.nama || "Pengguna"}!`,
+        icon: "success",
         timer: 1500,
-        showConfirmButton: false
+        showConfirmButton: false,
       });
-      navigate('/dashboard');
+      navigate("/dashboard", { replace: true });
     } catch (err) {
       Swal.fire({
-        title: 'Gagal Masuk',
-        text: err.response?.data?.detail || 'Kredensial salah atau terjadi kesalahan pada server.',
-        icon: 'error',
-        confirmButtonColor: '#1D63DC'
+        title: "Gagal Masuk",
+        text:
+          err.response?.data?.detail ||
+          "Kredensial salah atau terjadi kesalahan pada server.",
+        icon: "error",
+        confirmButtonColor: "#1D63DC",
       });
     } finally {
       setLoading(false);
@@ -79,10 +87,10 @@ localStorage.setItem('user', JSON.stringify({
     e.preventDefault();
     if (!nama || !email || !password) {
       Swal.fire({
-        title: 'Formulir Belum Lengkap',
-        text: 'Harap lengkapi semua field yang tersedia.',
-        icon: 'warning',
-        confirmButtonColor: '#1D63DC'
+        title: "Formulir Belum Lengkap",
+        text: "Harap lengkapi semua field yang tersedia.",
+        icon: "warning",
+        confirmButtonColor: "#1D63DC",
       });
       return;
     }
@@ -90,26 +98,28 @@ localStorage.setItem('user', JSON.stringify({
     setLoading(true);
     try {
       // KUNCI PERBAIKAN: Mapping state 'email' menjadi 'username'
-      await authService.register({ 
-        username: email, 
-        nama: nama, 
-        password: password, 
-        role: role 
+      await authService.register({
+        username: email,
+        nama: nama,
+        password: password,
+        role: role,
       });
-      
+
       Swal.fire({
-        title: 'Pendaftaran Berhasil!',
-        text: 'Akun Anda telah berhasil terdaftar. Silakan login.',
-        icon: 'success',
-        confirmButtonColor: '#1D63DC'
+        title: "Pendaftaran Berhasil!",
+        text: "Akun Anda telah berhasil terdaftar. Silakan login.",
+        icon: "success",
+        confirmButtonColor: "#1D63DC",
       });
-      setIsRegister(false); 
+      setIsRegister(false);
     } catch (err) {
       Swal.fire({
-        title: 'Pendaftaran Gagal',
-        text: err.response?.data?.detail || 'Registrasi gagal. Cek kembali data Anda.',
-        icon: 'error',
-        confirmButtonColor: '#1D63DC'
+        title: "Pendaftaran Gagal",
+        text:
+          err.response?.data?.detail ||
+          "Registrasi gagal. Cek kembali data Anda.",
+        icon: "error",
+        confirmButtonColor: "#1D63DC",
       });
     } finally {
       setLoading(false);
@@ -119,9 +129,9 @@ localStorage.setItem('user', JSON.stringify({
   return (
     <div className="min-h-screen bg-[#F1F5F9] flex items-center justify-center p-4 md:p-8 font-sans">
       <div className="w-full max-w-5xl bg-white rounded-3xl overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-gray-150 flex flex-col md:flex-row">
-        <div className="w-full md:w-[45%] bg-[#EAF1FF] p-8 md:p-10 flex flex-col justify-between items-start relative overflow-hidden">
+        <div className="w-full md:w-[45%] bg-[#EAF1FF] p-8 md:p-10 flex flex-col relative overflow-hidden min-h-[450px] md:min-h-full">
           {/* Logo & Sub-header */}
-          <div className="flex items-center gap-3 z-10">
+          <div className="flex items-center gap-3 z-10 mb-6 md:mb-8">
             <div className="bg-[#1D63DC] p-2 rounded-xl text-white shadow-sm">
               <GraduationCap className="w-6 h-6" />
             </div>
@@ -136,16 +146,18 @@ localStorage.setItem('user', JSON.stringify({
           </div>
 
           {/* Welcome Text & Graphic wrapper */}
-          <div className="w-full my-auto py-8 z-10 text-left">
+          <div className="w-full flex-grow flex flex-col justify-center z-10 text-left py-4 md:py-6">
             <h1 className="text-3xl sm:text-4xl font-extrabold text-[#1E293B] tracking-tight mb-2">
-              Selamat Datang!
+              {isRegister ? "Buat Akun Anda!" : "Selamat Datang!"}
             </h1>
             <p className="text-[#64748B] text-sm md:text-base leading-relaxed mb-6 font-medium max-w-sm">
-              Silakan masuk untuk mengakses sistem akademik kampus.
+              {isRegister
+                ? "Lengkapi formulir untuk mendaftar dan mulai mengakses layanan akademik."
+                : "Silakan masuk untuk mengakses sistem akademik kampus."}
             </p>
 
             {/* Custom Illustration */}
-            <div className="w-full max-w-[340px] mx-auto mt-6">
+            <div className="w-full max-w-[280px] md:max-w-[320px] mx-auto mt-4">
               <img
                 src="/login_illustration.png"
                 alt="Ilustrasi Akademik"
@@ -155,7 +167,7 @@ localStorage.setItem('user', JSON.stringify({
           </div>
 
           {/* Footer branding of portal */}
-          <div className="z-10 text-xs text-[#94A3B8] font-semibold">
+          <div className="z-10 text-xs text-[#94A3B8] font-semibold mt-6 md:mt-8">
             © 2026 Universitas UIN SUSKA RIAU. Semua Hak Dilindungi.
           </div>
 
@@ -584,31 +596,39 @@ localStorage.setItem('user', JSON.stringify({
                   onClick={() => {
                     const fakeUserObj = {
                       mahasiswa: {
+                        id: 1,
+                        username: "mahasiswa01",
                         nama: "Muhammad Aji",
-                        email: "mahasiswa@kampus.ac.id",
                         role: "mahasiswa",
                       },
                       dosen: {
+                        id: 2,
+                        username: "dosen01",
                         nama: "Dr. Sukarno",
-                        email: "dosen@kampus.ac.id",
                         role: "dosen",
                       },
                       admin: {
+                        id: 3,
+                        username: "admin01",
                         nama: "Admin E-Office",
-                        email: "admin@kampus.ac.id",
                         role: "admin",
                       },
                     };
                     const selectedUser =
                       fakeUserObj[role] || fakeUserObj.mahasiswa;
 
-                    localStorage.setItem(
-                      "token",
+                    saveUserSession(
                       "mock-jwt-token-header." +
-                        btoa(JSON.stringify(selectedUser)) +
+                        btoa(
+                          JSON.stringify({
+                            id: selectedUser.id,
+                            username: selectedUser.username,
+                            role: selectedUser.role,
+                          }),
+                        ) +
                         ".signature",
+                      selectedUser,
                     );
-                    localStorage.setItem("user", JSON.stringify(selectedUser));
 
                     Swal.fire({
                       title: "Demo Bypass Berhasil!",

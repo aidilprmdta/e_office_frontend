@@ -158,6 +158,7 @@ export default function Persetujuan() {
           <p><strong>Status:</strong> ${getStatusLabel(letter.status)}</p>
           <p><strong>Deskripsi:</strong> ${letter.deskripsi || '-'}</p>
           ${letter.catatan_revisi ? `<p class="text-amber-700"><strong>Catatan revisi:</strong> ${letter.catatan_revisi}</p>` : ''}
+          ${(tracking?.kode_verifikasi || letter.kode_verifikasi) ? `<p class="text-green-700"><strong>Kode verifikasi:</strong> ${tracking?.kode_verifikasi || letter.kode_verifikasi}</p>` : ''}
         </div>
       `,
       confirmButtonText: 'Tutup',
@@ -174,7 +175,7 @@ export default function Persetujuan() {
     {
       key: 'created_at',
       label: 'Tanggal',
-      render: (date) => <span className="text-sm text-gray-600 dark:text-gray-400">{formatDate(date)}</span>,
+      render: (date) => <span className="text-sm text-gray-600">{formatDate(date)}</span>,
     },
     {
       key: 'nama_mahasiswa',
@@ -185,7 +186,7 @@ export default function Persetujuan() {
       key: 'jenis_pengajuan',
       label: 'Jenis',
       render: (val) => (
-        <span className="font-bold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded text-xs">
+        <span className="font-bold text-blue-700 bg-blue-50 px-2 py-1 rounded text-xs">
           {val}
         </span>
       ),
@@ -209,7 +210,7 @@ export default function Persetujuan() {
           <div className="flex flex-wrap gap-1 max-w-xs">
             <button
               onClick={() => openDetail(row)}
-              className="p-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 rounded-md"
+              className="p-1.5 bg-blue-50 text-blue-600 rounded-md"
               title="Detail"
             >
               <Eye size={14} />
@@ -273,7 +274,7 @@ export default function Persetujuan() {
     },
   ];
 
-  const panelClass = 'bg-white dark:bg-gray-900 rounded-xl shadow-md p-6 border border-gray-100 dark:border-gray-800';
+  const panelClass = 'bg-white rounded-xl shadow-md p-6 border border-gray-100';
 
   return (
     <MainLayout>
@@ -287,10 +288,10 @@ export default function Persetujuan() {
 
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-extrabold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+          <h1 className="text-3xl font-extrabold text-gray-800 flex items-center gap-2">
             <span>✅</span> Persetujuan & Tracking Surat
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-gray-600 mt-1">
             Kelola alur status, upload surat jadi, dan permintaan revisi
           </p>
         </div>
@@ -309,7 +310,7 @@ export default function Persetujuan() {
               placeholder="Cari perihal atau kategori..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-800 dark:text-gray-100"
+              className="w-full pl-10 pr-4 py-2.5 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-800 focus:bg-white"
             />
           </div>
 
@@ -320,7 +321,7 @@ export default function Persetujuan() {
           ) : filteredLetters.length > 0 ? (
             <Table columns={columns} data={filteredLetters} />
           ) : (
-            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+            <div className="text-center py-12 text-gray-500">
               Tidak ada pengajuan yang perlu diproses saat ini.
             </div>
           )}

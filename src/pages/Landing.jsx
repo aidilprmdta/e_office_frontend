@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   GraduationCap,
@@ -235,46 +235,46 @@ export default function Landing() {
 
   const newsAndUpdates = [
     {
-      title: "Pengajuan Surat",
+      title: "Workflow Surat v2.0",
       icon: FileText,
       updates: [
-        "Pengajuan surat aktif kuliah",
-        "Surat izin penelitian",
-        "Surat rekomendasi",
-        "Tracking status real-time (timeline)",
-        "Sistem revisi jika ada kesalahan data",
+        "Status lengkap: diajukan → dalam proses → revisi → selesai / ditolak",
+        "Timeline visual 4 tahap di riwayat pengajuan",
+        "Upload berkas PDF/DOC (maks. 5 MB) & unduh surat jadi",
+        "Catatan revisi dari dosen jika pengajuan perlu perbaikan",
       ],
-      desc: "Memudahkan proses administrasi surat mahasiswa.",
+      desc: "Alur persuratan akademik lebih transparan dan terlacak.",
     },
     {
-      title: "Tugas Akhir",
+      title: "Tugas Akhir Digital",
       icon: BookOpen,
       updates: [
-        "Pendaftaran judul TA",
-        "Upload proposal",
-        "Persetujuan dosen",
-        "Monitoring progres",
+        "Pengajuan judul TA & upload proposal dalam satu formulir",
+        "Evaluasi & persetujuan dosen pembimbing dari dashboard",
+        "Lampiran abstrak/proposal dapat di-preview langsung",
+        "Riwayat status pengajuan TA tersimpan di sistem",
       ],
-      desc: "Mengelola proses tugas akhir secara digital.",
+      desc: "Manajemen tugas akhir terintegrasi dengan modul surat.",
     },
     {
-      title: "Notifikasi",
+      title: "Pusat Notifikasi",
       icon: Bell,
       updates: [
-        "Notifikasi in-app (bell icon)",
-        "Download surat jadi dari notifikasi",
-        "Update status otomatis",
-        "Siap integrasi WhatsApp & Email",
+        "Notifikasi in-app real-time (ikon bell di navbar)",
+        "Badge jumlah belum dibaca & tandai semua sudah dibaca",
+        "Tipe notifikasi: status update, revisi, surat selesai",
+        "Kolom email & no. HP user siap untuk integrasi WA/Email",
       ],
-      desc: "Memberikan informasi terbaru kepada pengguna.",
+      desc: "Mahasiswa dan dosen selalu mendapat kabar terbaru tanpa cek manual.",
     },
     {
       title: "Fitur Baru v2.0",
       icon: Zap,
       updates: [
-        "Timeline tracking 4 tahap surat",
-        "Upload & unduh surat jadi (PDF)",
-        "Workflow status lengkap untuk admin",
+        "Dashboard statistik: total pengajuan, pending, disetujui, ditolak",
+        "Manajemen user (mahasiswa, dosen, admin) via control panel",
+        "Autentikasi JWT & role-based access di seluruh modul",
+        "API FastAPI + dokumentasi Swagger di /docs",
       ],
       desc: "Pembaruan sistem — Mei 2026.",
     },
@@ -329,7 +329,13 @@ export default function Landing() {
             ))}
           </nav>
 
-          <div className="hidden md:flex gap-3">
+          <div className="hidden md:flex gap-3 items-center">
+            <Link
+              to="/verifikasi"
+              className="px-4 py-2.5 rounded-xl font-semibold text-gray-700 hover:text-blue-600 transition-colors"
+            >
+              Verifikasi Surat
+            </Link>
             <Link
               to="/login"
               className="px-5 py-2.5 rounded-xl font-bold bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300"
@@ -663,8 +669,9 @@ export default function Landing() {
               Update Terbaru Sistem
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Dari kemudahan akses sampai efisiensi administrasi, semua layanan
-              kami terus dikembangkan untuk pengalaman pengguna yang lebih baik.
+              Rilis E-Office v2.0 (Mei 2026) menghadirkan workflow surat yang
+              lebih jelas, notifikasi pintar, dan panel admin untuk pengelolaan
+              kampus yang lebih efisien.
             </p>
           </div>
 

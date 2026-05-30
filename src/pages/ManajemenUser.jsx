@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { MainLayout } from '../layouts';
 import { Table, Button, Card } from '../components';
-import { Search, Plus, Edit2, Trash2, X, UserPlus, Mail, Shield, User, Key } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, X, UserPlus, Shield, User, Key } from 'lucide-react';
 import { userService } from '../services';
 import Swal from 'sweetalert2';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -42,7 +42,7 @@ export default function ManajemenUser() {
       setUsers(data);
       setTotalPages(Math.max(1, Math.ceil(data.length / limit)));
     } catch (err) {
-      console.warn('Failed to load users from API. Using fallback mock data.');
+      console.warn('Failed to load users from API. Using fallback mock data.', err);
       const mockData = [
         {
           id: 1,
@@ -101,6 +101,7 @@ export default function ManajemenUser() {
       });
       loadUsers();
     } catch (err) {
+      console.warn('Create user offline fallback', err);
       // Mock offline insertion
       const newUser = {
         id: Date.now(),
@@ -143,6 +144,7 @@ export default function ManajemenUser() {
       setShowEditModal(false);
       loadUsers();
     } catch (err) {
+      console.warn('Update user offline fallback', err);
       setUsers(users.map(u => u.id === selectedUser.id ? { ...u, ...editFormData } : u));
       setShowEditModal(false);
       Swal.fire({
@@ -177,6 +179,7 @@ export default function ManajemenUser() {
         });
         loadUsers();
       } catch (err) {
+        console.warn('Delete user offline fallback', err);
         setUsers(users.filter(u => u.id !== id));
         Swal.fire({
           title: 'Dihapus (Offline)',

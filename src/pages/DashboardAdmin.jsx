@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { MainLayout } from '../layouts';
 import { Card, Table } from '../components';
 import { UserPlus, Shield, Users, Trash2, Edit, Search, ShieldAlert, History } from 'lucide-react';
@@ -6,6 +6,8 @@ import Swal from 'sweetalert2';
 import { motion } from 'framer-motion';
 
 import { adminService } from '../services';
+
+const AdminAnalyticsCharts = lazy(() => import('../components/AdminAnalyticsCharts'));
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -224,6 +226,20 @@ export default function AdminDashboard() {
           >
             <UserPlus size={16} /> Tambah User Baru
           </motion.button>
+        </motion.div>
+
+        {/* Analitik */}
+        <motion.div variants={itemVariants}>
+          <h2 className="text-xl font-bold text-gray-800 mb-4">Visualisasi Data</h2>
+          <Suspense
+            fallback={
+              <div className="flex justify-center py-12">
+                <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+              </div>
+            }
+          >
+            <AdminAnalyticsCharts />
+          </Suspense>
         </motion.div>
 
         {/* Stats */}

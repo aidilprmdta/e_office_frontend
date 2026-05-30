@@ -13,3 +13,4 @@ export { default as Riwayat } from "./Riwayat";
 export { default as Landing } from "./Landing";
 export { default as PengajuanJudulTA } from "./PengajuanJudulTA";
 export { default as Notifikasi } from "./Notifikasi";
+export { default as VerifikasiSurat } from "./VerifikasiSurat";

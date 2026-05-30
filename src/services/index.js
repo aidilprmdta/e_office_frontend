@@ -46,10 +46,21 @@ export const adminPengajuanService = {
 
 export const adminService = {
   getDashboard: () => apiClient.get("/admin/dashboard"),
+  getAnalytics: (bulan = 12) =>
+    apiClient.get("/admin/analytics", { params: { bulan } }),
   getUsers: () => apiClient.get("/admin/users"),
   createUser: (data) => apiClient.post("/admin/users", data),
   updateUser: (id, data) => apiClient.put(`/admin/users/${id}`, data),
   deleteUser: (id) => apiClient.delete(`/admin/users/${id}`),
+};
+
+export const searchService = {
+  search: ({ q, jenis, status, limit }) =>
+    apiClient.get("/search/", { params: { q, jenis, status, limit } }),
+};
+
+export const verifikasiService = {
+  cek: (kode) => apiClient.get(`/verifikasi/${encodeURIComponent(kode)}`),
 };
 
 export const userService = adminService;

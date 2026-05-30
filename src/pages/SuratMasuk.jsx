@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '../layouts';
 import { Table, Button } from '../components';
-import { Search, Eye, Plus, FileText } from 'lucide-react';
+import { Search, Plus, FileText } from 'lucide-react';
 import { formatDate, normalizeStatus, getStatusLabel, getStatusBadgeClass, getUploadUrl } from '../utils';
 import { pengajuanService, dosenService } from '../services';
 import { motion } from 'framer-motion';

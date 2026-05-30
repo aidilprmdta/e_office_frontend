@@ -1,33 +1,41 @@
 import axios from "axios";
 
-// Pastikan baseURL API konsisten dan selalu mengarah ke backend yang benar
+/**
+ * URL API backend — harus sama dengan uvicorn (default port 8000).
+ * Atur di .env: VITE_API_BASE_URL=http://localhost:8000/api
+ */
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ||
-  (window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1"
-    ? "http://localhost:8000/api"
-    : "https://your-production-domain/api");
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
+  timeout: 30000,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Tambahkan token ke setiap request
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  // PENTING: Jika data adalah FormData (upload file), hapus Content-Type
-  // agar browser otomatis set 'multipart/form-data' dengan boundary yang benar
   if (config.data instanceof FormData) {
     delete config.headers["Content-Type"];
   }
   return config;
 });
 
-export default apiClient;
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (!error.response) {
+      const base = API_BASE_URL.replace(/\/api\/?$/, "");
+      error.userMessage = `Tidak dapat terhubung ke server API (${base}). Pastikan backend berjalan: uvicorn app.main:app --reload --port 8000`;
+    }
+    return Promise.reject(error);
+  },
+);
 
+export { API_BASE_URL };
+export default apiClient;

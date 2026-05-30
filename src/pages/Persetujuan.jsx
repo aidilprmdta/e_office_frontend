@@ -1,268 +1,328 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { MainLayout } from '../layouts';
 import { Table, Card } from '../components';
-import { Check, X, Search, Eye, FileText, User, Calendar, Hash } from 'lucide-react';
-import { formatDate, normalizeStatus, isPendingStatus, getUploadUrl } from '../utils';
+import { Check, X, Search, Eye, FileText, Upload, RotateCcw } from 'lucide-react';
+import {
+  formatDate,
+  normalizeStatus,
+  getStatusLabel,
+  getStatusBadgeClass,
+  getUploadUrl,
+} from '../utils';
 import { dosenService } from '../services';
 import Swal from 'sweetalert2';
+
+const ACTIVE_STATUSES = [
+  'diajukan',
+  'diproses_admin',
+  'menunggu_tanda_tangan',
+  'perlu_revisi',
+  'pending',
+];
 
 export default function Persetujuan() {
   const [letters, setLetters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  
-  // Stats Counters
-  const [stats, setStats] = useState({
-    pending: 0,
-    disetujui: 0,
-    ditolak: 0
-  });
+  const [stats, setStats] = useState({ pending: 0, disetujui: 0, ditolak: 0 });
+  const uploadInputRef = useRef(null);
+  const [uploadTargetId, setUploadTargetId] = useState(null);
 
-  const loadPendingLetters = async () => {
+  const loadLetters = async () => {
     setLoading(true);
     try {
-      // Menggunakan dosenService sesuai arsitektur FastAPI
       const response = await dosenService.getPengajuanMasuk();
       const data = response.data || [];
-      
-      const pendingList = data.filter((l) => isPendingStatus(l.status));
-      const approvedCount = data.filter((l) => normalizeStatus(l.status) === 'disetujui').length;
-      const rejectedCount = data.filter((l) => normalizeStatus(l.status) === 'ditolak').length;
-
-      // Di halaman persetujuan, kita biasanya hanya menampilkan yang masih Pending
-      setLetters(pendingList);
+      const activeList = data.filter((l) =>
+        ACTIVE_STATUSES.includes(normalizeStatus(l.status)),
+      );
+      setLetters(activeList);
       setStats({
-        pending: pendingList.length,
-        disetujui: approvedCount,
-        ditolak: rejectedCount
+        pending: activeList.length,
+        disetujui: data.filter((l) => normalizeStatus(l.status) === 'selesai').length,
+        ditolak: data.filter((l) => normalizeStatus(l.status) === 'ditolak').length,
       });
     } catch (err) {
-      console.warn('Gagal memuat data dari API. Memakai mock data sementara.');
-      // Mock data disesuaikan dengan skema tabel Pengajuan FastAPI
-      const mockData = [
-        {
-          id: 1,
-          jenis_pengajuan: 'Surat',
-          kategori: 'Surat Izin Penelitian',
-          judul_perihal: 'Izin Penelitian di PT. ABC',
-          deskripsi: 'Mohon izin untuk melakukan penelitian skripsi di PT. ABC selama 1 bulan.',
-          created_at: '2026-05-20',
-          status: 'Pending',
-        },
-        {
-          id: 2,
-          jenis_pengajuan: 'Tugas Akhir',
-          kategori: 'Sistem Informasi',
-          judul_perihal: 'Sistem E-Office Berbasis Web',
-          deskripsi: 'Proposal tugas akhir untuk digitalisasi persuratan kampus.',
-          created_at: '2026-05-18',
-          status: 'Pending',
-        },
-      ];
-      setLetters(mockData);
-      setStats({ pending: 2, disetujui: 15, ditolak: 3 });
+      console.warn('Gagal memuat data:', err);
+      setLetters([]);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadPendingLetters();
+    loadLetters();
   }, []);
 
-  const handleApprove = async (id) => {
-    const { value: catatan } = await Swal.fire({
-      title: 'Setujui Pengajuan?',
-      text: 'Anda bisa memberikan catatan (opsional).',
-      input: 'text',
-      inputPlaceholder: 'Tulis catatan persetujuan di sini (opsional)...',
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#16A34A',
-      cancelButtonColor: '#6B7280',
-      confirmButtonText: 'Ya, Setujui',
-      cancelButtonText: 'Batal',
-    });
-
-    if (catatan !== undefined) { // Confirm button clicked
-      try {
-        // Mengirim data status dan catatan ke FastAPI
-        await dosenService.updateStatus(id, {
-          status: 'disetujui',
-          catatan_dosen: catatan || 'Disetujui tanpa catatan.',
-        });
-        
-        Swal.fire('Disetujui!', 'Pengajuan berhasil disetujui.', 'success');
-        loadPendingLetters();
-      } catch (err) {
-        // Mock offline
-        setLetters(letters.filter(l => l.id !== id));
-        setStats(prev => ({ ...prev, pending: prev.pending - 1, disetujui: prev.disetujui + 1 }));
-        Swal.fire('Disetujui (Offline)', 'Tersimpan di local state.', 'success');
-      }
+  const updateWorkflow = async (id, payload) => {
+    try {
+      await dosenService.updateStatusWorkflow(id, payload);
+      Swal.fire('Berhasil', 'Status pengajuan diperbarui.', 'success');
+      loadLetters();
+    } catch (err) {
+      const detail = err.response?.data?.detail;
+      Swal.fire('Gagal', typeof detail === 'string' ? detail : 'Gagal memperbarui status.', 'error');
     }
   };
 
-  const handleReject = async (id) => {
+  const handleProses = (id) =>
+    updateWorkflow(id, { status: 'diproses_admin', catatan: 'Sedang diproses admin' });
+
+  const handleMenungguTTD = (id) =>
+    updateWorkflow(id, { status: 'menunggu_tanda_tangan' });
+
+  const handleRevisi = async (id) => {
+    const { value: catatan } = await Swal.fire({
+      title: 'Minta Revisi',
+      input: 'textarea',
+      inputLabel: 'Catatan Revisi / Alasan (wajib min. 10 karakter)',
+      inputValidator: (v) => {
+        if (!v || v.trim().length < 10) return 'Catatan revisi wajib diisi';
+      },
+      showCancelButton: true,
+      confirmButtonText: 'Kirim ke Mahasiswa',
+    });
+    if (catatan) {
+      await updateWorkflow(id, { status: 'perlu_revisi', catatan_revisi: catatan });
+    }
+  };
+
+  const handleSelesai = async (id, row) => {
+    if (!row.file_hasil_url) {
+      Swal.fire(
+        'Upload Diperlukan',
+        'Unggah dokumen surat jadi terlebih dahulu sebelum menandai selesai.',
+        'warning',
+      );
+      return;
+    }
+    await updateWorkflow(id, { status: 'selesai', catatan: 'Surat selesai diproses' });
+  };
+
+  const handleTolak = async (id) => {
     const { value: reason } = await Swal.fire({
       title: 'Tolak Pengajuan?',
       input: 'text',
       inputLabel: 'Alasan Penolakan (Wajib)',
-      inputPlaceholder: 'Tuliskan alasan penolakan agar mahasiswa tahu...',
-      inputValidator: (value) => {
-        if (!value) {
-          return 'Anda wajib menuliskan alasan penolakan!';
-        }
-      },
+      inputValidator: (v) => (!v ? 'Alasan wajib diisi' : undefined),
       showCancelButton: true,
       confirmButtonColor: '#DC2626',
-      cancelButtonColor: '#6B7280',
       confirmButtonText: 'Ya, Tolak',
-      cancelButtonText: 'Batal',
     });
-
     if (reason) {
-      try {
-        // Mengirim data penolakan dan catatan ke FastAPI
-        await dosenService.updateStatus(id, {
-          status: 'ditolak',
-          catatan_dosen: reason,
-        });
-        
-        Swal.fire('Ditolak!', 'Pengajuan telah dikembalikan ke mahasiswa.', 'error');
-        loadPendingLetters();
-      } catch (err) {
-        // Mock offline
-        setLetters(letters.filter(l => l.id !== id));
-        setStats(prev => ({ ...prev, pending: prev.pending - 1, ditolak: prev.ditolak + 1 }));
-        Swal.fire('Ditolak (Offline)', `Alasan: ${reason}`, 'success');
-      }
+      await updateWorkflow(id, { status: 'ditolak', catatan: reason });
     }
   };
 
-  const openDetail = (letter) => {
-    Swal.fire({
-      title: `<h3 class="text-xl font-bold text-gray-800">${letter.judul_perihal}</h3>`,
+  const triggerUpload = (id) => {
+    setUploadTargetId(id);
+    uploadInputRef.current?.click();
+  };
+
+  const handleUploadHasil = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !uploadTargetId) return;
+    if (file.type !== 'application/pdf') {
+      Swal.fire('Format Salah', 'Hanya PDF yang diizinkan.', 'warning');
+      return;
+    }
+    const fd = new FormData();
+    fd.append('file', file);
+    try {
+      await dosenService.uploadHasil(uploadTargetId, fd);
+      Swal.fire('Berhasil', 'Dokumen hasil diunggah. Mahasiswa akan mendapat notifikasi.', 'success');
+      loadLetters();
+    } catch (err) {
+      Swal.fire('Gagal', err.response?.data?.detail || 'Upload gagal.', 'error');
+    } finally {
+      e.target.value = '';
+      setUploadTargetId(null);
+    }
+  };
+
+  const openDetail = async (letter) => {
+    let tracking = null;
+    try {
+      const res = await dosenService.getTracking(letter.id);
+      tracking = res.data;
+    } catch {
+      /* ignore */
+    }
+
+    await Swal.fire({
+      title: letter.judul_perihal,
       html: `
-        <div class="text-left space-y-4 mt-4 text-sm text-gray-700 bg-gray-50 p-5 rounded-xl border border-gray-200">
-          <div class="flex items-center gap-2 border-b border-gray-200 pb-2">
-             <span class="font-bold text-blue-700 bg-blue-100 px-2 py-1 rounded-md text-xs uppercase tracking-wide">${letter.jenis_pengajuan}</span>
-             <span class="text-gray-500 font-medium ml-auto">${formatDate(letter.created_at)}</span>
-          </div>
-          <p class="flex items-center gap-2"><strong>Kategori:</strong> ${letter.kategori}</p>
-          <div>
-            <p class="mb-1"><strong>Deskripsi / Abstrak:</strong></p>
-            <p class="leading-relaxed text-gray-600 bg-white p-4 rounded-lg border border-gray-100 max-h-40 overflow-y-auto shadow-sm">${letter.deskripsi || 'Tidak ada deskripsi.'}</p>
-          </div>
-          ${letter.file_url ? `<a href="${getUploadUrl(letter.file_url)}" target="_blank" rel="noreferrer" class="text-blue-600 font-bold hover:underline text-xs flex items-center gap-1 mt-2">📄 Unduh Dokumen PDF</a>` : '<p class="text-xs text-red-500 italic mt-2">Tidak ada lampiran PDF.</p>'}
+        <div class="text-left text-sm space-y-2">
+          <p><strong>Jenis:</strong> ${letter.jenis_pengajuan}</p>
+          <p><strong>Kategori:</strong> ${letter.kategori || '-'}</p>
+          <p><strong>Status:</strong> ${getStatusLabel(letter.status)}</p>
+          <p><strong>Deskripsi:</strong> ${letter.deskripsi || '-'}</p>
+          ${letter.catatan_revisi ? `<p class="text-amber-700"><strong>Catatan revisi:</strong> ${letter.catatan_revisi}</p>` : ''}
         </div>
       `,
-      showCancelButton: false,
-      confirmButtonColor: '#2563EB',
-      confirmButtonText: 'Tutup Detail',
-      width: '600px'
+      confirmButtonText: 'Tutup',
+      width: 560,
     });
   };
 
   const filteredLetters = letters.filter((letter) =>
     (letter.judul_perihal || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (letter.kategori || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (letter.jenis_pengajuan || '').toLowerCase().includes(searchTerm.toLowerCase())
+    (letter.kategori || '').toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const columns = [
-    { 
-      key: 'created_at', 
-      label: 'Tanggal', 
-      render: (date) => <span className="text-sm font-medium text-gray-600">{formatDate(date)}</span> 
+    {
+      key: 'created_at',
+      label: 'Tanggal',
+      render: (date) => <span className="text-sm text-gray-600 dark:text-gray-400">{formatDate(date)}</span>,
     },
-    { 
-      key: 'jenis_pengajuan', 
+    {
+      key: 'nama_mahasiswa',
+      label: 'Mahasiswa',
+      render: (val) => <span className="font-medium">{val || '-'}</span>,
+    },
+    {
+      key: 'jenis_pengajuan',
       label: 'Jenis',
-      render: (val) => <span className="font-bold text-blue-700 bg-blue-50 px-2 py-1 rounded text-xs">{val}</span>
+      render: (val) => (
+        <span className="font-bold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded text-xs">
+          {val}
+        </span>
+      ),
     },
-    { 
-      key: 'judul_perihal', 
-      label: 'Judul / Perihal',
-      render: (val) => <span className="font-bold text-gray-800 line-clamp-2">{val}</span> 
-    },
-    { 
-      key: 'kategori', 
-      label: 'Kategori' 
+    { key: 'judul_perihal', label: 'Judul / Perihal' },
+    {
+      key: 'status',
+      label: 'Status',
+      render: (status) => (
+        <span className={`px-2 py-1 rounded-full text-xs font-bold ${getStatusBadgeClass(status)}`}>
+          {getStatusLabel(status)}
+        </span>
+      ),
     },
     {
       key: 'id',
-      label: 'Aksi Persetujuan',
-      render: (id, row) => (
-        <div className="flex gap-2">
-          <button
-            onClick={() => openDetail(row)}
-            className="p-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-md transition-colors shadow-sm"
-            title="Lihat Detail & Dokumen"
-          >
-            <Eye size={16} />
-          </button>
-          <button
-            onClick={() => handleApprove(row.id)}
-            className="flex items-center gap-1 px-2.5 py-1 bg-green-50 hover:bg-green-100 text-green-700 rounded-md text-xs font-bold transition-all shadow-sm border border-green-200 hover:border-green-300"
-            title="Setujui Pengajuan"
-          >
-            <Check size={14} /> Setuju
-          </button>
-          <button
-            onClick={() => handleReject(row.id)}
-            className="flex items-center gap-1 px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-700 rounded-md text-xs font-bold transition-all shadow-sm border border-red-200 hover:border-red-300"
-            title="Tolak Pengajuan"
-          >
-            <X size={14} /> Tolak
-          </button>
-        </div>
-      ),
+      label: 'Aksi',
+      render: (id, row) => {
+        const s = normalizeStatus(row.status);
+        return (
+          <div className="flex flex-wrap gap-1 max-w-xs">
+            <button
+              onClick={() => openDetail(row)}
+              className="p-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 rounded-md"
+              title="Detail"
+            >
+              <Eye size={14} />
+            </button>
+            {(s === 'diajukan' || s === 'pending') && (
+              <button
+                onClick={() => handleProses(id)}
+                className="px-2 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-md"
+              >
+                Proses
+              </button>
+            )}
+            {['diajukan', 'diproses_admin', 'pending'].includes(s) && (
+              <button
+                onClick={() => handleMenungguTTD(id)}
+                className="px-2 py-1 bg-purple-50 text-purple-700 text-xs font-bold rounded-md"
+              >
+                TTD
+              </button>
+            )}
+            <button
+              onClick={() => triggerUpload(id)}
+              className="p-1.5 bg-teal-50 text-teal-700 rounded-md"
+              title="Upload surat jadi"
+            >
+              <Upload size={14} />
+            </button>
+            {row.file_hasil_url && (
+              <a
+                href={getUploadUrl(row.file_hasil_url)}
+                target="_blank"
+                rel="noreferrer"
+                className="p-1.5 bg-gray-50 text-gray-600 rounded-md"
+                title="Lihat hasil"
+              >
+                <FileText size={14} />
+              </a>
+            )}
+            <button
+              onClick={() => handleSelesai(id, row)}
+              className="flex items-center gap-0.5 px-2 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-md"
+            >
+              <Check size={12} /> Selesai
+            </button>
+            <button
+              onClick={() => handleRevisi(id)}
+              className="p-1.5 bg-amber-50 text-amber-700 rounded-md"
+              title="Minta revisi"
+            >
+              <RotateCcw size={14} />
+            </button>
+            <button
+              onClick={() => handleTolak(id)}
+              className="p-1.5 bg-red-50 text-red-700 rounded-md"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        );
+      },
     },
   ];
 
+  const panelClass = 'bg-white dark:bg-gray-900 rounded-xl shadow-md p-6 border border-gray-100 dark:border-gray-800';
+
   return (
     <MainLayout>
+      <input
+        type="file"
+        accept=".pdf"
+        className="hidden"
+        ref={uploadInputRef}
+        onChange={handleUploadHasil}
+      />
+
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-extrabold text-gray-800 flex items-center gap-2">
-            <span>✅</span> Persetujuan Pengajuan
+          <h1 className="text-3xl font-extrabold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+            <span>✅</span> Persetujuan & Tracking Surat
           </h1>
-          <p className="text-gray-600 mt-1">Review dan berikan keputusan untuk surat dan tugas akhir mahasiswa</p>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            Kelola alur status, upload surat jadi, dan permintaan revisi
+          </p>
         </div>
 
-        {/* Counter cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Card icon="⏳" title="Pending Persetujuan" value={stats.pending} color="yellow" />
-          <Card icon="✅" title="Telah Disetujui" value={stats.disetujui} color="green" />
-          <Card icon="❌" title="Telah Ditolak" value={stats.ditolak} color="red" />
+          <Card icon="⏳" title="Dalam Proses" value={stats.pending} color="yellow" />
+          <Card icon="✅" title="Selesai" value={stats.disetujui} color="green" />
+          <Card icon="❌" title="Ditolak" value={stats.ditolak} color="red" />
         </div>
 
-        <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+        <div className={panelClass}>
           <div className="relative mb-6">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
             <input
               type="text"
-              placeholder="Cari perihal, kategori, atau jenis pengajuan..."
+              placeholder="Cari perihal atau kategori..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50 focus:bg-white"
+              className="w-full pl-10 pr-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-800 dark:text-gray-100"
             />
           </div>
 
           {loading ? (
-            <div className="flex justify-center items-center py-16">
-              <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+            <div className="flex justify-center py-16">
+              <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
             </div>
+          ) : filteredLetters.length > 0 ? (
+            <Table columns={columns} data={filteredLetters} />
           ) : (
-            letters.length > 0 ? (
-              <Table columns={columns} data={filteredLetters} />
-            ) : (
-              <div className="text-center py-12 text-gray-500 font-medium">
-                <span className="text-4xl block mb-3">🎉</span>
-                Tidak ada pengajuan yang perlu di-review saat ini.
-              </div>
-            )
+            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+              Tidak ada pengajuan yang perlu diproses saat ini.
+            </div>
           )}
         </div>
       </div>

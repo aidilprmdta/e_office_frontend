@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '../layouts';
 import { Table, Button } from '../components';
 import { Search, Eye, Plus, FileText } from 'lucide-react';
-import { formatDate, normalizeStatus, getStatusLabel, getUploadUrl } from '../utils';
+import { formatDate, normalizeStatus, getStatusLabel, getStatusBadgeClass, getUploadUrl } from '../utils';
 import { pengajuanService, dosenService } from '../services';
 import { motion } from 'framer-motion';
 
@@ -77,17 +77,8 @@ export default function SuratMasuk() {
       key: 'status',
       label: 'Status',
       render: (status) => {
-        const s = normalizeStatus(status);
         return (
-          <span
-            className={`px-2 py-1 rounded-full text-xs font-bold ${
-              s === 'disetujui'
-                ? 'bg-green-100 text-green-700'
-                : s === 'ditolak'
-                ? 'bg-red-100 text-red-700'
-                : 'bg-yellow-100 text-yellow-700'
-            }`}
-          >
+          <span className={`px-2 py-1 rounded-full text-xs font-bold ${getStatusBadgeClass(status)}`}>
             {getStatusLabel(status)}
           </span>
         );

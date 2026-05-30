@@ -74,6 +74,7 @@ export default function Login({ initialTab }) {
         title: "Gagal Masuk",
         text:
           err.response?.data?.detail ||
+          err.userMessage ||
           "Kredensial salah atau terjadi kesalahan pada server.",
         icon: "error",
         confirmButtonColor: "#1D63DC",
@@ -117,6 +118,7 @@ export default function Login({ initialTab }) {
         title: "Pendaftaran Gagal",
         text:
           err.response?.data?.detail ||
+          err.userMessage ||
           "Registrasi gagal. Cek kembali data Anda.",
         icon: "error",
         confirmButtonColor: "#1D63DC",

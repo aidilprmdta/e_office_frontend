@@ -63,15 +63,15 @@ export default function Landing() {
     },
     {
       q: "Bagaimana cara mengetahui surat saya sudah disetujui?",
-      a: "Anda akan mendapatkan notifikasi real-time di bel notifikasi sistem. Status pengajuan Anda pada menu 'Riwayat Pengajuan' juga akan berubah secara instan menjadi berwarna hijau dengan keterangan 'disetujui' beserta catatan dosen pembimbing jika ada.",
+      a: "Anda akan mendapatkan notifikasi real-time di bel notifikasi sistem. Status pengajuan Anda pada menu 'Riwayat Pengajuan' juga akan berubah secara instan beserta catatan dosen pembimbing jika ada.",
     },
     {
       q: "Apakah saya bisa membatalkan pengajuan yang salah?",
-      a: "Ya, Anda hanya dapat menghapus atau membatalkan pengajuan berkas yang masih berstatus 'pending'. Jika pengajuan sudah diproses atau disetujui, Anda harus menghubungi dosen pembimbing atau administrator akademik untuk melakukan penyesuaian.",
+      a: "Ya, Anda dapat menghapus pengajuan yang masih berstatus diajukan atau perlu revisi. Jika sudah diproses admin, hubungi dosen atau administrator.",
     },
     {
       q: "Mengapa saya tidak bisa melakukan login setelah mendaftar?",
-      a: "Pastikan Anda memilih 'Role' yang sesuai (Mahasiswa/Dosen/Admin) saat melakukan login. Username/NIM yang dimasukkan juga harus sama persis dengan yang didaftarkan. Jika masih mengalami kendala, hubungi Pusat Bantuan kami.",
+      a: "Pastikan Anda memilih 'Role' yang sesuai (Mahasiswa/Dosen/Admin) saat melakukan login. Username/NIM yang dimasukkan juga harus sama persis dengan yang didaftarkan.",
     },
   ];
 
@@ -119,7 +119,7 @@ export default function Landing() {
       icon: Bell,
       title: "Notifikasi Real-time",
       description:
-        "Dapatkan notifikasi status pengajuan, revisi, dan persetujuan langsung via email & dashboard",
+        "Dapatkan notifikasi status pengajuan, revisi, dan persetujuan langsung via dashboard",
       color: "bg-purple-50",
       iconColor: "text-purple-600",
     },
@@ -237,19 +237,18 @@ export default function Landing() {
     {
       title: "Pengajuan Surat",
       icon: FileText,
-      color: "blue",
       updates: [
         "Pengajuan surat aktif kuliah",
         "Surat izin penelitian",
         "Surat rekomendasi",
-        "Tracking status real-time",
+        "Tracking status real-time (timeline)",
+        "Sistem revisi jika ada kesalahan data",
       ],
       desc: "Memudahkan proses administrasi surat mahasiswa.",
     },
     {
       title: "Tugas Akhir",
       icon: BookOpen,
-      color: "green",
       updates: [
         "Pendaftaran judul TA",
         "Upload proposal",
@@ -261,26 +260,23 @@ export default function Landing() {
     {
       title: "Notifikasi",
       icon: Bell,
-      color: "purple",
       updates: [
-        "Notifikasi email",
+        "Notifikasi in-app (bell icon)",
+        "Download surat jadi dari notifikasi",
         "Update status otomatis",
-        "Reminder pengajuan",
-        "Informasi persetujuan",
+        "Siap integrasi WhatsApp & Email",
       ],
       desc: "Memberikan informasi terbaru kepada pengguna.",
     },
     {
-      title: "Coming Soon",
+      title: "Fitur Baru v2.0",
       icon: Zap,
-      color: "orange",
       updates: [
-        "Integrasi SIAKAD",
-        "Tanda tangan digital",
-        "Mobile App",
-        "Fitur AI Assistant",
+        "Timeline tracking 4 tahap surat",
+        "Upload & unduh surat jadi (PDF)",
+        "Workflow status lengkap untuk admin",
       ],
-      desc: "Fitur baru sedang dalam pengembangan.",
+      desc: "Pembaruan sistem — Mei 2026.",
     },
   ];
 
@@ -335,7 +331,7 @@ export default function Landing() {
 
           <div className="hidden md:flex gap-3">
             <Link
-              to="/register"
+              to="/login"
               className="px-5 py-2.5 rounded-xl font-bold bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300"
             >
               Login
@@ -373,7 +369,7 @@ export default function Landing() {
               ))}
               <div className="flex gap-3 pt-3">
                 <Link
-                  to="/register"
+                  to="/login"
                   className="flex-1 text-center px-4 py-2 rounded-xl font-bold border-2 border-blue-600 text-blue-600"
                 >
                   Login
@@ -678,7 +674,10 @@ export default function Landing() {
             viewport={{ once: true, margin: "-80px" }}
             variants={{
               hidden: { opacity: 0 },
-              visible: { opacity: 1, transition: { staggerChildren: 0.12 } }
+              visible: {
+                opacity: 1,
+                transition: { staggerChildren: 0.12 },
+              },
             }}
             className="grid md:grid-cols-2 gap-8"
           >
@@ -686,43 +685,42 @@ export default function Landing() {
               <motion.div
                 variants={{
                   hidden: { opacity: 0, x: index % 2 === 0 ? -30 : 30 },
-                  visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: "easeOut" } }
+                  visible: {
+                    opacity: 1,
+                    x: 0,
+                    transition: { duration: 0.6, ease: "easeOut" },
+                  },
                 }}
-                key={index}
+                key={item.title}
                 className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden"
               >
-                {/* Header terminal */}
                 <div className="px-6 py-4 border-b bg-gray-200">
                   <div className="flex gap-2">
-                    <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                    <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                    <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                    <div className="w-3 h-3 rounded-full bg-red-400" />
+                    <div className="w-3 h-3 rounded-full bg-yellow-400" />
+                    <div className="w-3 h-3 rounded-full bg-green-400" />
                   </div>
                 </div>
 
-                {/* Content */}
                 <div className="p-6">
                   <div className="space-y-3 text-sm">
                     {item.updates.map((update, i) => (
                       <div key={i} className="flex items-center gap-3">
-                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
                         <span>{update}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Footer */}
                 <div className="border-t bg-gray-50 p-6 flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center">
+                  <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center shrink-0">
                     <item.icon className="w-7 h-7 text-blue-600" />
                   </div>
-
                   <div>
                     <h3 className="font-bold text-xl text-gray-800">
                       {item.title}
                     </h3>
-
                     <p className="text-gray-500 text-sm">{item.desc}</p>
                   </div>
                 </div>

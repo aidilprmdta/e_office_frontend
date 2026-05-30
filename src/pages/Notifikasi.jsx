@@ -119,8 +119,8 @@ export default function Notifikasi() {
                 return (
                   <li
                     key={notif.id}
-                    className={`p-5 flex gap-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
-                      !notif.is_read ? 'bg-blue-50/50 dark:bg-blue-900/20' : ''
+                    className={`p-5 flex gap-4 hover:bg-gray-50 transition-colors ${
+                      !notif.is_read ? 'bg-blue-50/50' : ''
                     }`}
                   >
                     <div
@@ -129,10 +129,10 @@ export default function Notifikasi() {
                       {meta.icon}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-800 dark:text-gray-100 leading-relaxed">
+                      <p className="text-sm font-medium text-gray-800 leading-relaxed">
                         {notif.pesan}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      <p className="text-xs text-gray-500 mt-1">
                         {notif.created_at ? formatDateTime(notif.created_at) : '-'}
                       </p>
                       <div className="flex flex-wrap gap-3 mt-2">
@@ -142,7 +142,7 @@ export default function Notifikasi() {
                             target="_blank"
                             rel="noreferrer"
                             onClick={() => handleMarkRead(notif.id)}
-                            className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline"
+                            className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:underline"
                           >
                             <Download size={12} /> Download Surat
                           </a>
@@ -154,7 +154,7 @@ export default function Notifikasi() {
                               handleMarkRead(notif.id);
                               navigate(`/riwayat-pengajuan?detail=${notif.pengajuan_id}`);
                             }}
-                            className="text-xs text-gray-600 dark:text-gray-400 hover:underline"
+                            className="text-xs text-gray-600 hover:underline"
                           >
                             Lihat tracking
                           </button>

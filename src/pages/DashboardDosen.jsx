@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { MainLayout } from '../layouts';
 import { Card, Table } from '../components';
-import { Check, X, Eye, FileText, AlertCircle, Search, Inbox } from 'lucide-react';
+import { Check, X, Eye, Search, Inbox } from 'lucide-react';
 import { formatDate, isPendingStatus, normalizeStatus, getUploadUrl } from '../utils';
 import { dosenService } from '../services';
 import Swal from 'sweetalert2';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 export default function DosenDashboard() {
   const [pengajuanList, setPengajuanList] = useState([]);
@@ -31,7 +31,7 @@ export default function DosenDashboard() {
         ditolak: rejected
       });
     } catch (err) {
-      console.warn("API Dosen bermasalah/401. Menggunakan fallback mock data.");
+      console.warn("API Dosen bermasalah/401. Menggunakan fallback mock data.", err);
       // Fallback Mock Data disesuaikan persis dengan skema MySQL baru kamu
       const mockData = [
         {
@@ -104,6 +104,7 @@ export default function DosenDashboard() {
         Swal.fire('Berhasil!', `Pengajuan telah ${payload.status}.`, 'success');
         fetchDosenData(); // Reload list
       } catch (err) {
+        console.warn('Backend offline, memperbarui UI lokal.', err);
         // Mock UI response jika backend offline
         setPengajuanList(prev => prev.filter(item => item.id !== id));
         setStats(prev => ({

@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { authService, notifikasiService } from '../services';
+import GlobalSearch from './GlobalSearch';
 import { clearUserSession, getStoredUser, formatDateTime, getUploadUrl } from '../utils';
 function getNotifIcon(notif) {
   const tipe = (notif.tipe || '').toLowerCase();
@@ -94,7 +95,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     clearUserSession();
-    navigate('/login');
+    navigate('/');
   };
 
   const menuVariants = {
@@ -105,13 +106,15 @@ export default function Navbar() {
 
   return (
     <header className="bg-white shadow-md border-b-2 border-blue-100">
-      <div className="flex items-center justify-between px-6 py-4">
-        <div className="flex-1 ml-12 md:ml-0">
-          <h2 className="text-xl md:text-2xl font-bold text-gray-800">E-Office Kampus</h2>
-          <p className="text-xs text-gray-500 mt-0.5">Sistem Manajemen Surat & Tugas Akhir</p>
+      <div className="flex flex-col md:flex-row md:items-center gap-3 px-4 md:px-6 py-3 md:py-4">
+        <div className="flex-shrink-0 ml-12 md:ml-0 md:w-48 lg:w-56">
+          <h2 className="text-lg md:text-xl font-bold text-gray-800">E-Office Kampus</h2>
+          <p className="text-xs text-gray-500 mt-0.5 hidden sm:block">Sistem Manajemen Surat & TA</p>
         </div>
 
-        <div className="flex items-center gap-4 md:gap-6">
+        <GlobalSearch />
+
+        <div className="flex items-center gap-4 md:gap-6 self-end md:self-auto">
           <div className="relative">
             <motion.button
               whileHover={{ scale: 1.1 }}

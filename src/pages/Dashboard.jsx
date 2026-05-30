@@ -1,16 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MainLayout } from "../layouts";
-import { Card, Table, Button } from "../components";
+import { Card, Table } from "../components";
 import { pengajuanService, dosenService, userService } from "../services";
 import { formatDate, isPendingStatus } from "../utils";
 import { useAuth } from "../hooks/useAuth";
 import { adminService } from "../services";
 import {
   Mail,
-  Send,
   BookOpen,
-  CheckSquare,
   ArrowRight,
   TrendingUp,
   Clock,
@@ -107,7 +105,7 @@ export default function Dashboard() {
         });
 
         setRecentLetters(recentData.slice(0, 3));
-      } catch (error) {
+      } catch {
         console.warn("Menggunakan mock data (Backend belum siap/offline)");
         // Mock Data Fallback
         setStats({
@@ -124,168 +122,65 @@ export default function Dashboard() {
     loadDashboardData();
   }, [userRole, effectiveRole]);
 
-  // 4. KONFIGURASI TAMPILAN BERDASARKAN ROLE (Menyambungkan State Stats)
-  let statCards = [];
-  let quickActions = [];
-  let tableColumns = [];
-
-  if (effectiveRole === "dosen") {
-    statCards = [
-      {
-        icon: <Mail size={24} />,
-        title: "Pengajuan Surat",
-        value: stats.suratMasuk,
-        color: "blue",
-        trend: "Bulan Ini",
-      },
-      {
-        icon: <AlertCircle size={24} />,
-        title: "Perlu Persetujuan",
-        value: stats.persetujuanPending,
-        color: "yellow",
-        trend: "Status Pending",
-      },
-      {
-        icon: <BookOpen size={24} />,
-        title: "TA Dibimbing",
-        value: stats.tugasAkhir,
-        color: "purple",
-        trend: "Mahasiswa Bimbingan",
-      },
-    ];
-    quickActions = [
-      {
-        icon: <Mail size={20} />,
-        label: "Lihat Pengajuan Masuk",
-        color:
-          "bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200",
-        action: () => navigate("/persetujuan"),
-      },
-      {
-        icon: <BookOpen size={20} />,
-        label: "Daftar Judul TA",
-        color:
-          "bg-purple-50 hover:bg-purple-100 text-purple-600 border border-purple-200",
-        action: () => navigate("/tugas-akhir"),
-      },
-    ];
-    tableColumns = [
-      { key: "mahasiswa_id", label: "ID Mhs" },
-      { key: "jenis_pengajuan", label: "Jenis" },
-      { key: "judul_perihal", label: "Judul/Perihal" },
-      { key: "status", label: "Status" },
-    ];
-  } else if (effectiveRole === "admin") {
-    statCards = [
-      {
-        icon: <Users size={24} />,
-        title: "Total User",
-        value: stats.totalUser,
-        color: "green",
-        trend: "Mahasiswa & Dosen",
-      },
-      {
-        icon: <Mail size={24} />,
-        title: "Total Pengajuan",
-        value: stats.suratMasuk,
-        color: "blue",
-        trend: "Surat & TA",
-      },
-      {
-        icon: <BookOpen size={24} />,
-        title: "Judul TA",
-        value: stats.tugasAkhir,
-        color: "purple",
-        trend: "Didaftarkan",
-      },
-    ];
-    quickActions = [
-      {
-        icon: <Users size={20} />,
-        label: "Manajemen User",
-        color:
-          "bg-green-50 hover:bg-green-100 text-green-600 border border-green-200",
-        action: () => navigate("/users"),
-      },
-      {
-        icon: <Mail size={20} />,
-        label: "Lihat Semua Pengajuan",
-        color:
-          "bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200",
-        action: () => navigate("/surat-masuk"),
-      },
-    ];
-    tableColumns = [
-      { key: "username", label: "Username" },
-      { key: "nama", label: "Nama" },
-      { key: "role", label: "Role" },
-    ];
-  } else {
-    // MAHASISWA (Default)
-    statCards = [
-      {
-        icon: <Mail size={24} />,
-        title: "Pengajuan Surat",
-        value: stats.suratMasuk,
-        color: "blue",
-        trend: "Total Pengajuan",
-      },
-      {
-        icon: <BookOpen size={24} />,
-        title: "Judul TA",
-        value: stats.tugasAkhir,
-        color: "purple",
-        trend: "Judul Diajukan",
-      },
-      {
-        icon: <AlertCircle size={24} />,
-        title: "Status Pending",
-        value: stats.persetujuanPending,
-        color: "yellow",
-        trend: "Menunggu Persetujuan",
-      },
-    ];
-    quickActions = [
-      {
-        icon: <Mail size={20} />,
-        label: "Buat Pengajuan Surat",
-        color:
-          "bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200",
-        action: () => navigate("/pengajuan"),
-      },
-      {
-        icon: <BookOpen size={20} />,
-        label: "Ajukan Judul TA",
-        color:
-          "bg-purple-50 hover:bg-purple-100 text-purple-600 border border-purple-200",
-        action: () => navigate("/pengajuan-judul-ta"),
-      },
-      {
-        icon: <BookOpen size={20} />,
-        label: "Lihat Daftar TA",
-        color:
-          "bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200",
-        action: () => navigate("/tugas-akhir"),
-      },
-      {
-        icon: <TrendingUp size={20} />,
-        label: "Riwayat Pengajuan",
-        color:
-          "bg-yellow-50 hover:bg-yellow-100 text-yellow-600 border border-yellow-200",
-        action: () => navigate("/riwayat-pengajuan"),
-      },
-    ];
-    tableColumns = [
-      {
-        key: "created_at",
-        label: "Tanggal",
-        render: (date) => formatDate(date),
-      },
-      { key: "jenis_pengajuan", label: "Jenis" },
-      { key: "judul_perihal", label: "Judul/Perihal" },
-      { key: "status", label: "Status" },
-    ];
-  }
+  // 4. KONFIGURASI TAMPILAN BERDASARKAN ROLE
+  const { statCards, quickActions, tableColumns } = (() => {
+    if (effectiveRole === "dosen") {
+      return {
+        statCards: [
+          { icon: <Mail size={24} />, title: "Pengajuan Surat", value: stats.suratMasuk, color: "blue", trend: "Bulan Ini" },
+          { icon: <AlertCircle size={24} />, title: "Perlu Persetujuan", value: stats.persetujuanPending, color: "yellow", trend: "Status Pending" },
+          { icon: <BookOpen size={24} />, title: "TA Dibimbing", value: stats.tugasAkhir, color: "purple", trend: "Mahasiswa Bimbingan" },
+        ],
+        quickActions: [
+          { icon: <Mail size={20} />, label: "Lihat Pengajuan Masuk", color: "bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200", action: () => navigate("/persetujuan") },
+          { icon: <BookOpen size={20} />, label: "Daftar Judul TA", color: "bg-purple-50 hover:bg-purple-100 text-purple-600 border border-purple-200", action: () => navigate("/tugas-akhir") },
+        ],
+        tableColumns: [
+          { key: "mahasiswa_id", label: "ID Mhs" },
+          { key: "jenis_pengajuan", label: "Jenis" },
+          { key: "judul_perihal", label: "Judul/Perihal" },
+          { key: "status", label: "Status" },
+        ],
+      };
+    }
+    if (effectiveRole === "admin") {
+      return {
+        statCards: [
+          { icon: <Users size={24} />, title: "Total User", value: stats.totalUser, color: "green", trend: "Mahasiswa & Dosen" },
+          { icon: <Mail size={24} />, title: "Total Pengajuan", value: stats.suratMasuk, color: "blue", trend: "Surat & TA" },
+          { icon: <BookOpen size={24} />, title: "Judul TA", value: stats.tugasAkhir, color: "purple", trend: "Didaftarkan" },
+        ],
+        quickActions: [
+          { icon: <Users size={20} />, label: "Manajemen User", color: "bg-green-50 hover:bg-green-100 text-green-600 border border-green-200", action: () => navigate("/users") },
+          { icon: <Mail size={20} />, label: "Lihat Semua Pengajuan", color: "bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200", action: () => navigate("/surat-masuk") },
+        ],
+        tableColumns: [
+          { key: "username", label: "Username" },
+          { key: "nama", label: "Nama" },
+          { key: "role", label: "Role" },
+        ],
+      };
+    }
+    return {
+      statCards: [
+        { icon: <Mail size={24} />, title: "Pengajuan Surat", value: stats.suratMasuk, color: "blue", trend: "Total Pengajuan" },
+        { icon: <BookOpen size={24} />, title: "Judul TA", value: stats.tugasAkhir, color: "purple", trend: "Judul Diajukan" },
+        { icon: <AlertCircle size={24} />, title: "Status Pending", value: stats.persetujuanPending, color: "yellow", trend: "Menunggu Persetujuan" },
+      ],
+      quickActions: [
+        { icon: <Mail size={20} />, label: "Buat Pengajuan Surat", color: "bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200", action: () => navigate("/pengajuan") },
+        { icon: <BookOpen size={20} />, label: "Ajukan Judul TA", color: "bg-purple-50 hover:bg-purple-100 text-purple-600 border border-purple-200", action: () => navigate("/pengajuan-judul-ta") },
+        { icon: <BookOpen size={20} />, label: "Lihat Daftar TA", color: "bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200", action: () => navigate("/tugas-akhir") },
+        { icon: <TrendingUp size={20} />, label: "Riwayat Pengajuan", color: "bg-yellow-50 hover:bg-yellow-100 text-yellow-600 border border-yellow-200", action: () => navigate("/riwayat-pengajuan") },
+      ],
+      tableColumns: [
+        { key: "created_at", label: "Tanggal", render: (date) => formatDate(date) },
+        { key: "jenis_pengajuan", label: "Jenis" },
+        { key: "judul_perihal", label: "Judul/Perihal" },
+        { key: "status", label: "Status" },
+      ],
+    };
+  })();
 
   // 5. ANIMASI FRAMER MOTION
   const containerVariants = {
@@ -330,7 +225,7 @@ export default function Dashboard() {
                   {effectiveRole}
                 </span>
               </p>
-              <div className="flex gap-4 mt-4 text-blue-200 text-sm font-medium">
+              <div className="flex gap-4 mt-4 text-blue-100 text-sm font-medium">
                 <div className="flex items-center gap-2">
                   <Clock size={16} />
                   <span>Sistem Online</span>

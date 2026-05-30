@@ -21,6 +21,7 @@ import {
   Riwayat,
   Register,
   Notifikasi,
+  VerifikasiSurat,
 } from "./pages";
 import { isAuthenticated, getUserRole, normalizeRole } from "./utils";
 import { useAuth } from "./hooks/useAuth";
@@ -58,6 +59,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<Landing />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/verifikasi" element={<VerifikasiSurat />} />
 
         <Route
           path="/dashboard"

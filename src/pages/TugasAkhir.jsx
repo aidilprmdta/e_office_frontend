@@ -40,7 +40,7 @@ export default function TugasAkhir() {
       setTasks(filteredTA);
       
     } catch (err) {
-      console.warn('Gagal memuat data Tugas Akhir. Pastikan Backend menyala.');
+      console.warn('Gagal memuat data Tugas Akhir. Pastikan Backend menyala.', err);
     } finally {
       setLoading(false);
     }

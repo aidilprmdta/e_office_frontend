@@ -29,6 +29,7 @@ export default function Sidebar() {
     { icon: '🎓', label: 'Ajukan Judul TA', path: '/pengajuan-judul-ta', allowedRoles: ['mahasiswa'] },
     { icon: '📋', label: 'Riwayat Pengajuan', path: '/riwayat-pengajuan', allowedRoles: ['mahasiswa'] },
     { icon: '🔔', label: 'Notifikasi', path: '/notifikasi' },
+    { icon: '🔍', label: 'Verifikasi Surat', path: '/verifikasi' },
     { icon: '📨', label: 'Pengajuan Surat', path: '/surat-masuk' },
     { icon: '🎓', label: 'Tugas Akhir', path: '/tugas-akhir' },
     { icon: '✅', label: 'Persetujuan', path: '/persetujuan', allowedRoles: ['dosen', 'admin'] },
@@ -37,7 +38,7 @@ export default function Sidebar() {
 
   const handleLogout = () => {
     clearUserSession();
-    navigate('/login');
+    navigate('/');
   };
 
   const handleNavigate = (path) => {
@@ -63,7 +64,7 @@ export default function Sidebar() {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsOpen(!isOpen)}
-          className="fixed top-4 left-4 z-50 p-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg shadow-lg hover:shadow-xl"
+          className="fixed top-4 left-4 z-50 p-2 bg-gradient-to-r from-blue-700 to-blue-800 text-white rounded-lg shadow-lg hover:shadow-xl"
         >
           {isOpen ? <X size={24} /> : <Menu size={24} />}
         </motion.button>
@@ -127,7 +128,7 @@ export default function Sidebar() {
             </button>
           </div>
           <div className="py-2 text-center text-xs text-blue-300 border-t border-blue-800">
-            <p>v1.0.0</p>
+            <p>v2.0.0</p>
           </div>
         </div>
       </aside>

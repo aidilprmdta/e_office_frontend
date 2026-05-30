@@ -32,6 +32,17 @@ apiClient.interceptors.response.use(
     if (!error.response) {
       const base = API_BASE_URL.replace(/\/api\/?$/, "");
       error.userMessage = `Tidak dapat terhubung ke server API (${base}). Pastikan backend berjalan: uvicorn app.main:app --reload --port 8000`;
+    } else if (error.response.status === 401) {
+      const path = window.location.pathname;
+      const isPublic = path === '/' || path === '/login' || path === '/register' || path.startsWith('/verifikasi');
+      if (!isPublic) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.dispatchEvent(new Event('auth-change'));
+        if (!path.startsWith('/login')) {
+          window.location.href = '/login';
+        }
+      }
     }
     return Promise.reject(error);
   },

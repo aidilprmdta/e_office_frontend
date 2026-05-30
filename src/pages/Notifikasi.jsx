@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { MainLayout } from '../layouts';
 import { Button } from '../components';
 import { notifikasiService } from '../services';
-import { formatDateTime } from '../utils';
-import { Bell, CheckCheck, Info } from 'lucide-react';
+import { formatDateTime, getUploadUrl } from '../utils';
+import { useNavigate } from 'react-router-dom';
+import { Bell, CheckCheck, Info, Download } from 'lucide-react';
 
 function getNotifIcon(pesan) {
   const p = (pesan || '').toLowerCase();
@@ -15,6 +16,7 @@ function getNotifIcon(pesan) {
 }
 
 export default function Notifikasi() {
+  const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('semua');
@@ -112,11 +114,13 @@ export default function Notifikasi() {
             <ul className="divide-y divide-gray-100">
               {filtered.map((notif) => {
                 const meta = getNotifIcon(notif.pesan);
+                const data = notif.metadata || {};
+                const downloadUrl = data.file_url ? getUploadUrl(data.file_url) : null;
                 return (
                   <li
                     key={notif.id}
-                    className={`p-5 flex gap-4 hover:bg-gray-50 transition-colors ${
-                      !notif.is_read ? 'bg-blue-50/50' : ''
+                    className={`p-5 flex gap-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
+                      !notif.is_read ? 'bg-blue-50/50 dark:bg-blue-900/20' : ''
                     }`}
                   >
                     <div
@@ -125,12 +129,37 @@ export default function Notifikasi() {
                       {meta.icon}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-800 leading-relaxed">
+                      <p className="text-sm font-medium text-gray-800 dark:text-gray-100 leading-relaxed">
                         {notif.pesan}
                       </p>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {notif.created_at ? formatDateTime(notif.created_at) : '-'}
                       </p>
+                      <div className="flex flex-wrap gap-3 mt-2">
+                        {downloadUrl && (
+                          <a
+                            href={downloadUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={() => handleMarkRead(notif.id)}
+                            className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline"
+                          >
+                            <Download size={12} /> Download Surat
+                          </a>
+                        )}
+                        {notif.pengajuan_id && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              handleMarkRead(notif.id);
+                              navigate(`/riwayat-pengajuan?detail=${notif.pengajuan_id}`);
+                            }}
+                            className="text-xs text-gray-600 dark:text-gray-400 hover:underline"
+                          >
+                            Lihat tracking
+                          </button>
+                        )}
+                      </div>
                     </div>
                     {!notif.is_read && (
                       <button

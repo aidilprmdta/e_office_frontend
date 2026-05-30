@@ -1,14 +1,17 @@
-import { Bell, User, ChevronDown, LogOut } from 'lucide-react';
+import { Bell, User, ChevronDown, LogOut, Download } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { authService, notifikasiService } from '../services';
-import { clearUserSession, getStoredUser, formatDateTime } from '../utils';
-
-function getNotifIcon(pesan) {
-  const p = (pesan || '').toLowerCase();
-  if (p.includes('disetujui')) return '✅';
+import { clearUserSession, getStoredUser, formatDateTime, getUploadUrl } from '../utils';
+function getNotifIcon(notif) {
+  const tipe = (notif.tipe || '').toLowerCase();
+  if (tipe === 'surat_selesai') return '✅';
+  if (tipe === 'revisi') return '✏️';
+  const p = (notif.pesan || '').toLowerCase();
+  if (p.includes('selesai')) return '✅';
   if (p.includes('ditolak')) return '❌';
+  if (p.includes('revisi')) return '✏️';
   if (p.includes('tugas akhir')) return '🎓';
   if (p.includes('pengajuan baru')) return '📨';
   return '🔔';
@@ -148,7 +151,12 @@ export default function Navbar() {
                   <div className="overflow-y-auto flex-1">
                     {notifications.length > 0 ? (
                       <div className="divide-y divide-gray-100">
-                        {notifications.map((notif) => (
+                        {notifications.map((notif) => {
+                          const meta = notif.metadata || {};
+                          const downloadUrl = meta.file_url
+                            ? getUploadUrl(meta.file_url)
+                            : null;
+                          return (
                           <div
                             key={notif.id}
                             className={`p-4 hover:bg-gray-50 transition-colors ${
@@ -157,7 +165,7 @@ export default function Navbar() {
                           >
                             <div className="flex gap-3">
                               <span className="text-xl flex-shrink-0">
-                                {getNotifIcon(notif.pesan)}
+                                {getNotifIcon(notif)}
                               </span>
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium text-gray-800 leading-snug">
@@ -166,10 +174,36 @@ export default function Navbar() {
                                 <p className="text-xs text-gray-500 mt-1">
                                   {timeAgo(notif.created_at)}
                                 </p>
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                  {downloadUrl && (
+                                    <a
+                                      href={downloadUrl}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      onClick={() => notifikasiService.markAsRead(notif.id)}
+                                      className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:underline"
+                                    >
+                                      <Download size={12} /> Download Surat
+                                    </a>
+                                  )}
+                                  {notif.pengajuan_id && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setShowNotifications(false);
+                                        notifikasiService.markAsRead(notif.id);
+                                        navigate(`/riwayat-pengajuan?detail=${notif.pengajuan_id}`);
+                                      }}
+                                      className="text-xs text-gray-600 hover:underline"
+                                    >
+                                      Lihat tracking
+                                    </button>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </div>
-                        ))}
+                        );})}
                       </div>
                     ) : (
                       <div className="p-6 text-center text-gray-500 text-sm">

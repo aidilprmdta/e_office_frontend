@@ -5,14 +5,29 @@ Aplikasi web modern untuk mengelola surat-menyurat dan tugas akhir mahasiswa di 
 
 ---
 
-## 🚀 Fitur Utama
+## 🚀 Fitur Utama (v2.0)
 
-- ✉️ **Manajemen Surat Masuk/Keluar** - Kelola surat dengan mudah
-- 📋 **Sistem Persetujuan** - Alur persetujuan surat yang terstruktur
-- 🎓 **Manajemen Tugas Akhir** - Pantau progress tugas akhir mahasiswa
-- 👥 **Manajemen User** - Admin dapat mengelola pengguna dan role
-- 📊 **Dashboard** - Visualisasi data dan statistik
-- 🔐 **Autentikasi & Otorisasi** - Keamanan berbasis role
+- 📍 **Tracking status surat** — timeline visual (Diajukan → Selesai)
+- ✏️ **Sistem revisi** — admin minta perbaikan, mahasiswa kirim ulang
+- 🔔 **Notifikasi in-app** — download surat jadi dari bell icon
+- 🌙 **Dark mode** — toggle di navbar, preferensi di localStorage
+- ✉️ **Pengajuan surat & TA** — upload PDF, persetujuan multi-role
+- 🔐 **JWT** — mahasiswa / dosen / admin
+
+## ⚙️ Port & Environment
+
+Salin `.env.example` ke `.env`:
+
+```env
+VITE_API_BASE_URL=http://localhost:8000/api
+```
+
+| Layanan | Port |
+|---------|------|
+| Frontend (Vite) | 5173 |
+| Backend (FastAPI) | 8000 |
+
+Proxy dev Vite: `/api` dan `/uploads` → `localhost:8000` (lihat `vite.config.js`).
 
 ---
 

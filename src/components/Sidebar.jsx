@@ -29,7 +29,6 @@ export default function Sidebar() {
     { icon: '🎓', label: 'Ajukan Judul TA', path: '/pengajuan-judul-ta', allowedRoles: ['mahasiswa'] },
     { icon: '📋', label: 'Riwayat Pengajuan', path: '/riwayat-pengajuan', allowedRoles: ['mahasiswa'] },
     { icon: '🔔', label: 'Notifikasi', path: '/notifikasi' },
-    { icon: '🔍', label: 'Verifikasi Surat', path: '/verifikasi' },
     { icon: '📨', label: 'Pengajuan Surat', path: '/surat-masuk' },
     { icon: '🎓', label: 'Tugas Akhir', path: '/tugas-akhir' },
     { icon: '✅', label: 'Persetujuan', path: '/persetujuan', allowedRoles: ['dosen', 'admin'] },

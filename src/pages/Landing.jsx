@@ -331,12 +331,6 @@ export default function Landing() {
 
           <div className="hidden md:flex gap-3 items-center">
             <Link
-              to="/verifikasi"
-              className="px-4 py-2.5 rounded-xl font-semibold text-gray-700 hover:text-blue-600 transition-colors"
-            >
-              Verifikasi Surat
-            </Link>
-            <Link
               to="/login"
               className="px-5 py-2.5 rounded-xl font-bold bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300"
             >

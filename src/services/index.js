@@ -12,7 +12,7 @@ export const authService = {
 };
 
 export const pengajuanService = {
-  getRiwayat: () => apiClient.get("/mahasiswa/pengajuan/me"),
+  getRiwayat: () => apiClient.get("/mahasiswa/pengajuan"),
   getList: () => apiClient.get("/mahasiswa/pengajuan"),
   create: (data) => apiClient.post("/mahasiswa/pengajuan", data),
   delete: (id) => apiClient.delete(`/mahasiswa/pengajuan/${id}`),

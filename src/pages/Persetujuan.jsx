@@ -249,12 +249,14 @@ export default function Persetujuan() {
                 <FileText size={14} />
               </a>
             )}
-            <button
-              onClick={() => handleSelesai(id, row)}
-              className="flex items-center gap-0.5 px-2 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-md"
-            >
-              <Check size={12} /> Selesai
-            </button>
+         {s === 'menunggu_tanda_tangan' && (
+  <button
+    onClick={() => handleSelesai(id, row)}
+    className="flex items-center gap-0.5 px-2 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-md"
+  >
+    <Check size={12} /> Selesai
+  </button>
+)}
             <button
               onClick={() => handleRevisi(id)}
               className="p-1.5 bg-amber-50 text-amber-700 rounded-md"

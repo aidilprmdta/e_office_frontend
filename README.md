@@ -1,4 +1,5 @@
 # 📬 E-Office Kampus Frontend
+
 ## Sistem Informasi Surat-Menyurat & Tugas Akhir
 
 Aplikasi web modern untuk mengelola surat-menyurat dan tugas akhir mahasiswa di kampus.
@@ -22,9 +23,9 @@ Salin `.env.example` ke `.env`:
 VITE_API_BASE_URL=http://localhost:8000/api
 ```
 
-| Layanan | Port |
-|---------|------|
-| Frontend (Vite) | 5173 |
+| Layanan           | Port |
+| ----------------- | ---- |
+| Frontend (Vite)   | 5173 |
 | Backend (FastAPI) | 8000 |
 
 Proxy dev Vite: `/api` dan `/uploads` → `localhost:8000` (lihat `vite.config.js`).
@@ -68,6 +69,7 @@ src/
 ## 🛠️ Setup & Instalasi
 
 ### Prerequisites
+
 - Node.js v16+
 - npm atau yarn
 
@@ -114,28 +116,34 @@ VITE_API_BASE_URL=http://localhost:5000/api
 ## 📖 Panduan Penggunaan
 
 ### 1. Login
+
 Masuk dengan akun Anda. Demo credentials:
+
 - Email: `demo@kampus.ac.id`
 - Password: `demo123`
 
 ### 2. Dashboard
+
 Lihat statistik dan akses cepat ke fitur utama.
 
 ### 3. Surat Masuk
+
 Kelola surat yang masuk dengan fitur pencarian dan filter.
 
 ### 4. Tugas Akhir
+
 Pantau dan persetujui tugas akhir mahasiswa.
 
 ---
 
 ## 🔌 Integrasi API
 
-Semua API calls sudah dikonfigurasi di `src/services/index.js`. 
+Semua API calls sudah dikonfigurasi di `src/services/index.js`.
 
 Contoh penggunaan:
+
 ```javascript
-import { suratService } from '../services';
+import { suratService } from "../services";
 
 // Get surat masuk
 const response = await suratService.getMasuk();
@@ -170,6 +178,7 @@ npm run lint
 ## 📱 Responsive Design
 
 Aplikasi sepenuhnya responsive dan dapat diakses dari:
+
 - Desktop
 - Tablet
 - Mobile
@@ -179,6 +188,7 @@ Aplikasi sepenuhnya responsive dan dapat diakses dari:
 ## 🔒 Autentikasi
 
 Token JWT disimpan di localStorage. Setiap request otomatis menyertakan token di header:
+
 ```
 Authorization: Bearer <token>
 ```
@@ -187,16 +197,16 @@ Authorization: Bearer <token>
 
 ## 🎯 Route Map
 
-| Path | Deskripsi |
-|------|-----------|
-| `/login` | Halaman login |
-| `/dashboard` | Dashboard utama |
-| `/surat-masuk` | Daftar surat masuk |
-| `/surat-keluar` | Daftar surat keluar |
-| `/tugas-akhir` | Manajemen tugas akhir |
-| `/persetujuan` | Surat perlu persetujuan |
-| `/users` | Manajemen user (admin) |
-| `/settings` | Pengaturan |
+| Path            | Deskripsi               |
+| --------------- | ----------------------- |
+| `/login`        | Halaman login           |
+| `/dashboard`    | Dashboard utama         |
+| `/surat-masuk`  | Daftar surat masuk      |
+| `/surat-keluar` | Daftar surat keluar     |
+| `/tugas-akhir`  | Manajemen tugas akhir   |
+| `/persetujuan`  | Surat perlu persetujuan |
+| `/users`        | Manajemen user (admin)  |
+| `/settings`     | Pengaturan              |
 
 ---
 
@@ -209,6 +219,58 @@ Untuk pertanyaan atau kontribusi, silakan buat issue atau pull request.
 ## 📄 Lisensi
 
 Project ini merupakan tugas akhir untuk mata kuliah Pemrograman Web.
+
+---
+
+# E-Office Frontend
+
+Panduan menjalankan frontend (Vite + React).
+
+## Prasyarat
+
+- Node.js 18+ dan npm/yarn
+
+## Instalasi & Jalankan
+
+1. Install dependensi
+
+   ```bash
+   npm install
+   ```
+
+2. Jalankan dev server (default port 5173)
+
+   ```bash
+   npm run dev
+   ```
+
+## Konfigurasi API
+
+- Atur `VITE_API_BASE_URL` di file `.env` pada root proyek frontend jika backend berjalan di port berbeda.
+  Contoh `.env`:
+
+  ```
+  VITE_API_BASE_URL=http://localhost:8000/api
+  ```
+
+## Catatan
+
+- Form pengajuan menggunakan multipart/form-data — jangan memaksa header `Content-Type: application/json` saat mengirim FormData.
+- Jika muncul CORS error, pastikan backend sudah mengizinkan origin (lihat README backend).
+
+## Tata letak & Perubahan UI
+
+- Halaman login/register menggunakan satu komponen dengan tab. Jika membuka `/register`, komponen login akan menerima prop `initialTab="register"`.
+- Landing page memiliki tautan yang mengarahkan ke `/register` untuk membuka langsung tab pendaftaran.
+
+## Troubleshooting
+
+- 404 Not Found: Periksa `VITE_API_BASE_URL` dan jalankan backend di port yang sesuai.
+- 422 saat submit FormData: pastikan field bernama sesuai dan gunakan FormData.
+
+## Kontak
+
+- Dokumentasi backend: http://localhost:8000/docs (jika backend berjalan)
 
 ---
 

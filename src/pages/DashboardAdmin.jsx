@@ -228,7 +228,6 @@ export default function AdminDashboard() {
           </motion.button>
         </motion.div>
 
-        {/* Analitik */}
         <motion.div variants={itemVariants}>
           <h2 className="text-xl font-bold text-gray-800 mb-4">Visualisasi Data</h2>
           <Suspense
@@ -242,7 +241,6 @@ export default function AdminDashboard() {
           </Suspense>
         </motion.div>
 
-        {/* Stats */}
         <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <Card icon="👥" title="Total Akun" value={stats.totalUsers} color="blue" />
           <Card icon="🎓" title="Mahasiswa" value={stats.mahasiswa} color="indigo" />
@@ -250,7 +248,6 @@ export default function AdminDashboard() {
           <Card icon="📜" title="Total Log" value={stats.totalLogs} color="red" />
         </motion.div>
 
-        {/* Tabs + Table */}
         <motion.div variants={itemVariants} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="flex border-b border-gray-100 bg-gray-50/50">
             <button

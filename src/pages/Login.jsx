@@ -8,7 +8,6 @@ import {
   EyeOff,
   Users,
   ChevronDown,
-  Key,
   GraduationCap,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -29,7 +28,6 @@ export default function Login({ initialTab }) {
   const [role, setRole] = useState("mahasiswa");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [showDemo, setShowDemo] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -147,7 +145,6 @@ export default function Login({ initialTab }) {
             </div>
           </div>
 
-          {/* Welcome Text & Graphic wrapper */}
           <div className="w-full flex-grow flex flex-col justify-center z-10 text-left py-4 md:py-6">
             <h1 className="text-3xl sm:text-4xl font-extrabold text-[#1E293B] tracking-tight mb-2">
               {isRegister ? "Buat Akun Anda!" : "Selamat Datang!"}
@@ -158,7 +155,6 @@ export default function Login({ initialTab }) {
                 : "Silakan masuk untuk mengakses sistem akademik kampus."}
             </p>
 
-            {/* Custom Illustration */}
             <div className="w-full max-w-[280px] md:max-w-[320px] mx-auto mt-4">
               <img
                 src="/login_illustration.png"
@@ -168,19 +164,15 @@ export default function Login({ initialTab }) {
             </div>
           </div>
 
-          {/* Footer branding of portal */}
           <div className="z-10 text-xs text-[#94A3B8] font-semibold mt-6 md:mt-8">
             © 2026 Universitas UIN SUSKA RIAU. Semua Hak Dilindungi.
           </div>
 
-          {/* Soft background glow circles */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-blue-100 rounded-full filter blur-3xl opacity-60 pointer-events-none -translate-y-1/2 translate-x-1/3"></div>
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-50 rounded-full filter blur-2xl opacity-80 pointer-events-none translate-y-1/3 -translate-x-1/4"></div>
         </div>
 
-        {/* RIGHT COLUMN: White Interactive Portal Forms */}
         <div className="w-full md:w-[55%] p-8 md:p-12 flex flex-col justify-center bg-white text-left">
-          {/* TAB NAVIGATION: Login vs Register */}
           <div className="flex border-b border-gray-200 mb-8 w-full">
             <button
               onClick={() => {
@@ -498,158 +490,6 @@ export default function Login({ initialTab }) {
         </div>
       </div>
 
-      {/* FLOATING ACTION WIDGET: Developer / Demo Bypass Tool */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <div className="relative">
-          {/* Key Button */}
-          <button
-            onClick={() => setShowDemo(!showDemo)}
-            className="flex items-center justify-center w-12 h-12 bg-[#1E293B] text-white hover:bg-slate-700 rounded-full shadow-lg border-2 border-slate-600 transition-transform active:scale-95 focus:outline-none"
-            title="Akses Demo Developer"
-          >
-            <Key
-              className={`w-5 h-5 ${showDemo ? "rotate-45 text-yellow-400" : ""} transition-transform duration-200`}
-            />
-          </button>
-
-          {/* Quick-select Demo Credential Panel */}
-          <AnimatePresence>
-            {showDemo && (
-              <motion.div
-                initial={{ opacity: 0, y: 15, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 15, scale: 0.95 }}
-                className="absolute bottom-16 right-0 w-72 bg-[#1E293B] border border-slate-700 p-5 rounded-2xl shadow-xl space-y-4 text-white"
-              >
-                <div>
-                  <h3 className="font-bold text-sm flex items-center gap-1.5 text-yellow-400">
-                    <span>💡</span> Demo Access Panel
-                  </h3>
-                  <p className="text-[10px] text-slate-400 mt-1 leading-normal">
-                    Pilih akun simulasi di bawah untuk mengisi formulir secara
-                    otomatis, atau bypass autentikasi jika server offline.
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  {/* Mahasiswa Account Option */}
-                  <button
-                    onClick={() => {
-                      setEmail("mahasiswa@kampus.ac.id");
-                      setPassword("password");
-                      setRole("mahasiswa");
-                    }}
-                    className="w-full p-2.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 rounded-xl text-xs font-semibold flex items-center justify-between text-left transition-colors"
-                  >
-                    <div>
-                      <p className="text-slate-200">Mahasiswa Account</p>
-                      <p className="text-[9px] text-slate-400 mt-0.5">
-                        mahasiswa@kampus.ac.id / password
-                      </p>
-                    </div>
-                    <span className="text-[9px] bg-blue-500/20 text-blue-400 font-bold px-2 py-0.5 rounded">
-                      MHS
-                    </span>
-                  </button>
-
-                  {/* Dosen Account Option */}
-                  <button
-                    onClick={() => {
-                      setEmail("dosen@kampus.ac.id");
-                      setPassword("password");
-                      setRole("dosen");
-                    }}
-                    className="w-full p-2.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 rounded-xl text-xs font-semibold flex items-center justify-between text-left transition-colors"
-                  >
-                    <div>
-                      <p className="text-slate-200">Dosen Account</p>
-                      <p className="text-[9px] text-slate-400 mt-0.5">
-                        dosen@kampus.ac.id / password
-                      </p>
-                    </div>
-                    <span className="text-[9px] bg-emerald-500/20 text-emerald-400 font-bold px-2 py-0.5 rounded">
-                      DSN
-                    </span>
-                  </button>
-
-                  {/* Admin Account Option */}
-                  <button
-                    onClick={() => {
-                      setEmail("admin@kampus.ac.id");
-                      setPassword("password");
-                      setRole("admin");
-                    }}
-                    className="w-full p-2.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 rounded-xl text-xs font-semibold flex items-center justify-between text-left transition-colors"
-                  >
-                    <div>
-                      <p className="text-slate-200">Admin Account</p>
-                      <p className="text-[9px] text-slate-400 mt-0.5">
-                        admin@kampus.ac.id / password
-                      </p>
-                    </div>
-                    <span className="text-[9px] bg-yellow-500/20 text-yellow-400 font-bold px-2 py-0.5 rounded">
-                      ADM
-                    </span>
-                  </button>
-                </div>
-
-                {/* Instant Bypass Button for Offline API */}
-                <button
-                  onClick={() => {
-                    const fakeUserObj = {
-                      mahasiswa: {
-                        id: 1,
-                        username: "mahasiswa01",
-                        nama: "Muhammad Aji",
-                        role: "mahasiswa",
-                      },
-                      dosen: {
-                        id: 2,
-                        username: "dosen01",
-                        nama: "Dr. Sukarno",
-                        role: "dosen",
-                      },
-                      admin: {
-                        id: 3,
-                        username: "admin01",
-                        nama: "Admin E-Office",
-                        role: "admin",
-                      },
-                    };
-                    const selectedUser =
-                      fakeUserObj[role] || fakeUserObj.mahasiswa;
-
-                    saveUserSession(
-                      "mock-jwt-token-header." +
-                        btoa(
-                          JSON.stringify({
-                            id: selectedUser.id,
-                            username: selectedUser.username,
-                            role: selectedUser.role,
-                          }),
-                        ) +
-                        ".signature",
-                      selectedUser,
-                    );
-
-                    Swal.fire({
-                      title: "Demo Bypass Berhasil!",
-                      text: `Masuk sebagai ${selectedUser.nama} (${selectedUser.role})`,
-                      icon: "success",
-                      timer: 1500,
-                      showConfirmButton: false,
-                    });
-                    navigate("/dashboard");
-                  }}
-                  className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-colors shadow-sm"
-                >
-                  ⚡ Bypass & Masuk Instan (Offline Mode)
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
     </div>
   );
 }

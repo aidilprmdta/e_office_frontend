@@ -108,7 +108,7 @@ export default function Sidebar() {
               }`}
             >
               <span className="text-xl flex-shrink-0">{item.icon}</span>
-              <span>{item.label}</span>
+              <span className="text-left">{item.label}</span>
               {isActive(item.path) && (
                 <span className="absolute right-4 w-2 h-2 bg-white rounded-full" />
               )}

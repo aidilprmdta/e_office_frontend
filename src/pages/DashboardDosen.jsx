@@ -191,7 +191,6 @@ export default function DosenDashboard() {
           <p className="text-gray-500 mt-1">Periksa berkas administrasi dan pengajuan judul mahasiswa Teknik Informatika</p>
         </motion.div>
 
-        {/* Statistik Counters */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

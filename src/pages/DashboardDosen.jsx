@@ -24,7 +24,7 @@ export default function DosenDashboard() {
       const approved = data.filter((p) => normalizeStatus(p.status) === 'disetujui').length;
       const rejected = data.filter((p) => normalizeStatus(p.status) === 'ditolak').length;
 
-      setPengajuanList(pending); // Dashboard dosen fokus ke yang butuh approval (Pending)
+      setPengajuanList(pending);
       setStats({
         pending: pending.length,
         disetujui: approved,
@@ -32,12 +32,11 @@ export default function DosenDashboard() {
       });
     } catch (err) {
       console.warn("API Dosen bermasalah/401. Menggunakan fallback mock data.", err);
-      // Fallback Mock Data disesuaikan persis dengan skema MySQL baru kamu
       const mockData = [
         {
           id: 1,
           mahasiswa_id: 101,
-          nama_mahasiswa: "Aidil Pramadita", // Tambahan dari join table user
+          nama_mahasiswa: "Aidil Pramadita",
           jenis_pengajuan: "Surat",
           kategori: "Surat Izin Penelitian",
           judul_perihal: "Permohonan Izin Riset di RDO Labsquad",
@@ -98,14 +97,12 @@ export default function DosenDashboard() {
           catatan_dosen: catatan || (isApprove ? 'Disetujui.' : '')
         };
         
-        // Kirim PUT/PATCH ke FastAPI
         await dosenService.updateStatus(id, payload);
         
         Swal.fire('Berhasil!', `Pengajuan telah ${payload.status}.`, 'success');
-        fetchDosenData(); // Reload list
+        fetchDosenData(); 
       } catch (err) {
         console.warn('Backend offline, memperbarui UI lokal.', err);
-        // Mock UI response jika backend offline
         setPengajuanList(prev => prev.filter(item => item.id !== id));
         setStats(prev => ({
           ...prev,

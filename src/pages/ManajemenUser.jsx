@@ -11,17 +11,14 @@ export default function ManajemenUser() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const limit = 5;
 
-  // Modal States
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
-  // Form States
   const [createFormData, setCreateFormData] = useState({
     nama: '',
     username: '',
@@ -102,7 +99,6 @@ export default function ManajemenUser() {
       loadUsers();
     } catch (err) {
       console.warn('Create user offline fallback', err);
-      // Mock offline insertion
       const newUser = {
         id: Date.now(),
         ...createFormData,

@@ -96,7 +96,6 @@ export default function Login({ initialTab }) {
 
     setLoading(true);
     try {
-      // KUNCI PERBAIKAN: Mapping state 'email' menjadi 'username'
       await authService.register({
         username: email,
         nama: nama,

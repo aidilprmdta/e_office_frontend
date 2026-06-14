@@ -168,7 +168,7 @@ export default function Dashboard() {
         { key: "created_at", label: "Tanggal", render: (date) => formatDate(date) },
         { key: "jenis_pengajuan", label: "Jenis" },
         { key: "judul_perihal", label: "Judul/Perihal" },
-        // ✅ SESUDAH
+   
 { key: "status", label: "Status", render: (s) => (
   <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${getStatusBadgeClass(s)}`}>
     {getStatusLabel(s)}

@@ -48,6 +48,8 @@ export const adminService = {
   getDashboard: () => apiClient.get("/admin/dashboard"),
   getAnalytics: (bulan = 12) =>
     apiClient.get("/admin/analytics", { params: { bulan } }),
+  getKategoriSurat: (bulan = 24) =>
+    apiClient.get("/admin/kategori-surat", { params: { bulan } }),
   getUsers: () => apiClient.get("/admin/users"),
   createUser: (data) => apiClient.post("/admin/users", data),
   updateUser: (id, data) => apiClient.put(`/admin/users/${id}`, data),

@@ -1,6 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { MainLayout } from '../layouts';
-import { Card, Table } from '../components';
+import { Card, Table, KategoriSurat } from '../components';
 import { UserPlus, Shield, Users, Trash2, Edit, Search, ShieldAlert, History } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { motion } from 'framer-motion';
@@ -226,6 +226,11 @@ export default function AdminDashboard() {
           >
             <UserPlus size={16} /> Tambah User Baru
           </motion.button>
+        </motion.div>
+
+        <motion.div variants={itemVariants}>
+          <h2 className="text-xl font-bold text-gray-800 mb-4">Kategori Surat Masuk</h2>
+          <KategoriSurat />
         </motion.div>
 
         <motion.div variants={itemVariants}>
